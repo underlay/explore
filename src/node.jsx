@@ -80,7 +80,7 @@ export function NodeView({ id, node, parent, nodes, compact }) {
 			<td>
 				<strong>@id</strong>
 			</td>
-			<td colSpan="2">{id}</td>
+			<td colSpan="2">{compact(id)}</td>
 		</tr>
 	)
 	const rows = []
