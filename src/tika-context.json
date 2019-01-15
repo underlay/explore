@@ -4,7 +4,6 @@
 	"Iptc4xmpCore": "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",
 	"Iptc4xmpExt": "http://iptc.org/std/Iptc4xmpExt/2008-02-29/",
 	"plus": "http://ns.useplus.org/ldf/xmp/1.0/",
-	"meta": "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
 	"cp": "http://schemas.openxmlformats.org/package/2006/metadata/core-properties/",
 	"extended-properties": "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties/",
 	"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",

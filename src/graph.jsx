@@ -95,9 +95,9 @@ export default class Graph extends React.Component {
 			const base = `dweb:/ipfs/${hash}`
 			// const ctx = getInitialContext({ base })
 			const ctx = getContext(base)
-			this.props.ipfs
-				.get(hash)
-				.then(([{ content }]) => jsonld.fromRDF(content.toString(), { format }))
+			this.props.ipfs.files
+				.cat(hash)
+				.then(file => jsonld.fromRDF(file.toString(), { format }))
 				.then(value => this.setState({ value, hash, ctx }))
 				.catch(error => this.setState({ error }))
 		} else {
