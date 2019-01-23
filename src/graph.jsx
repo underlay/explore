@@ -17,6 +17,7 @@ import {
 	getTableId,
 	getContainerId,
 } from "./node"
+import fetchHash from "./fetch"
 
 import baseContext from "./base-context.json"
 import tikaContext from "./tika-context.json"
@@ -93,11 +94,9 @@ export default class Graph extends React.Component {
 		const hash = window.location.hash.slice(1)
 		if (hash) {
 			const base = `dweb:/ipfs/${hash}`
-			// const ctx = getInitialContext({ base })
 			const ctx = getContext(base)
-			this.props.ipfs.files
-				.cat(hash)
-				.then(file => jsonld.fromRDF(file.toString(), { format }))
+			fetchHash(hash)
+				.then(file => jsonld.fromRDF(file, { format }))
 				.then(value => this.setState({ value, hash, ctx }))
 				.catch(error => this.setState({ error }))
 		} else {
@@ -173,7 +172,7 @@ export default class Graph extends React.Component {
 		} else if (error) {
 			return <p className="error">{error.toString()}</p>
 		} else {
-			return null
+			return <p>Enter a hash in the fragment!</p>
 		}
 	}
 }
