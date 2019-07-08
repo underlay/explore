@@ -53,6 +53,7 @@ export default class Message extends React.Component {
 		const hash = window.location.hash.slice(1)
 
 		this.cys = {}
+		this.selected = null
 
 		if (base58.test(hash)) {
 			const context = Message.getContext(`ul:/ipfs/${hash}`)
@@ -84,14 +85,16 @@ export default class Message extends React.Component {
 			.then(Message.parseMessage)
 			.then(store => {
 				const graphs = []
+				const graphIds = {}
 				store.forGraphs(({ termType, id }) => {
 					if (termType === "BlankNode") {
 						graphs.push(id)
+						graphIds[id] = encode(id)
 					} else if (termType !== "DefaultGraph") {
 						throw GraphNameError
 					}
 				})
-				this.setState({ store, graphs })
+				this.setState({ store, graphs, graphIds })
 			})
 			.catch(error => this.setState({ ...Message.nullState, error }))
 	}
@@ -101,56 +104,72 @@ export default class Message extends React.Component {
 	}
 
 	handleMouseOver = id => {
-		for (const graph of this.state.graphs) {
+		const { graphs, graphIds } = this.state
+		for (const graph of graphs) {
 			this.cys[graph].$("#" + id).classes("hover")
-			if (encode(graph) === id) {
-				const container = document.querySelector(`.graph[graph-name="${id}"]`)
-				container.classList.add("hover")
+			if (id === graphIds[graph]) {
+				this.cys[graph].container().classList.add("hover")
 			}
 		}
 		this.cys[""].$("#" + id).classes("hover")
 	}
 
-	handleMouseOut = id => {
-		for (const graph of this.state.graphs) {
-			this.cys[graph].$("#" + id).classes("")
-			if (encode(graph) === id) {
-				const container = document.querySelector(`.graph[graph-name="${id}"]`)
-				container.classList.remove("hover")
+	handleMouseOut = (id, graph) => {
+		const { graphs, graphIds } = this.state
+		if (id === null) {
+			this.cys[graph].$(".hover").classes("")
+		} else {
+			for (const graph of graphs) {
+				this.cys[graph].$("#" + id).classes("")
+				if (id === graphIds[graph]) {
+					this.cys[graph].container().classList.remove("hover")
+				}
 			}
+			this.cys[""].$("#" + id).classes("")
 		}
-		this.cys[""].$("#" + id).classes("")
 	}
 
 	handleSelect = (id, sourceGraph) => {
-		for (const graph of this.state.graphs) {
-			if (graph !== sourceGraph) {
-				this.cys[graph].$("#" + id).select()
+		if (id !== this.selected) {
+			this.selected = id
+			const { graphs, graphIds } = this.state
+			for (const graph of graphs) {
+				if (graph !== sourceGraph) {
+					this.cys[graph].$(":selected").unselect()
+					this.cys[graph].$("#" + id).select()
+				}
+				if (id === graphIds[graph]) {
+					this.cys[graph].container().classList.add("selected")
+				}
 			}
-			if (encode(graph) === id) {
-				const container = document.querySelector(`.graph[graph-name="${id}"]`)
-				container.classList.add("selected")
-			}
-		}
 
-		if (sourceGraph !== "") {
-			this.cys[""].$("#" + id).select()
+			if (sourceGraph !== "") {
+				this.cys[""].$(":selected").unselect()
+				this.cys[""].$("#" + id).select()
+			}
 		}
 	}
 
 	handleUnselect = (id, sourceGraph) => {
-		for (const graph of this.state.graphs) {
-			if (graph !== sourceGraph) {
-				this.cys[graph].$("#" + id).unselect()
-			}
-			if (encode(graph) === id) {
-				const container = document.querySelector(`.graph[graph-name="${id}"]`)
-				container.classList.remove("selected")
-			}
+		const { graphs, graphIds } = this.state
+
+		const graph = graphs.find(graph => graphIds[graph] === id)
+		if (graph !== undefined) {
+			this.cys[graph].container().classList.remove("selected")
 		}
 
-		if (sourceGraph !== "") {
-			this.cys[""].$("#" + id).unselect()
+		if (id === this.selected) {
+			this.selected = null
+
+			for (const graph of graphs) {
+				if (graph !== sourceGraph) {
+					this.cys[graph].$(":selected").unselect()
+				}
+			}
+
+			if (sourceGraph !== "") {
+				this.cys[""].$(":selected").unselect()
+			}
 		}
 	}
 
@@ -188,7 +207,7 @@ export default class Message extends React.Component {
 				<PanelGroup
 					direction="row"
 					borderColor={Message.BorderColor}
-					spacing={2}
+					spacing={1}
 					onUpdate={this.handleOuterUpdate}
 					panelWidths={[
 						{ size: 360, minSize: 240, resize: "dynamic" },
@@ -199,7 +218,7 @@ export default class Message extends React.Component {
 					<PanelGroup
 						direction="column"
 						borderColor={Message.BorderColor}
-						spacing={2}
+						spacing={1}
 						onUpdate={this.handleInnerUpdate}
 					>
 						{graphs.map(this.renderGraph)}

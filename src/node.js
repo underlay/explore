@@ -1,8 +1,27 @@
-import { RDF_TYPE } from "./utils"
+import {
+	RDF_TYPE,
+	FONT_SIZE,
+	FONT_FAMILY,
+	LINE_HEIGHT,
+	TAB,
+	CHAR,
+} from "./utils"
 
-const TAB = 2
-const CHAR = 7.2
-const LINE_HEIGHT = 18
+const prefixes = {
+	schema: "#990000",
+	rdf: "#005A9C",
+	prov: "green",
+	ipfs: "#6ACAD1",
+}
+
+const values = {
+	"http://www.w3.org/2001/XMLSchema#string": "#0077AA",
+	"http://www.w3.org/2001/XMLSchema#boolean": "#FF9900",
+	"http://www.w3.org/2001/XMLSchema#integer": "#CA7841",
+	"http://www.w3.org/2001/XMLSchema#double": "#CA7841",
+	"http://www.w3.org/2001/XMLSchema#date": "#990055",
+	"http://www.w3.org/2001/XMLSchema#dateTime": "#990055",
+}
 
 const STYLE = `<style>
 text {
@@ -24,6 +43,9 @@ text {
 }
 .prefix[prefix="prov"] {
   fill: green;
+}
+.prefix[prefix="ipfs"] {
+  fill: #6acad1;
 }
 .value[type="http://www.w3.org/2001/XMLSchema#string"] {
   fill: #0077AA;
@@ -192,7 +214,7 @@ export default function Node(id, types, literals, compact) {
 		height = top + h * LINE_HEIGHT - 10
 	}
 
-	lines[0] = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" font-size="12" font-family="Monaco, monospace">`
+	lines[0] = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" font-size="${FONT_SIZE}" font-family="${FONT_FAMILY}">`
 
 	lines.push("</svg>")
 

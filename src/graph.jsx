@@ -6,25 +6,34 @@ import { compactIri } from "jsonld/lib/compact"
 
 import Node from "./node.js"
 
-import { RDF_TYPE, encode } from "./utils.js"
+import { RDF_TYPE, encode, CHAR, TAB } from "./utils.js"
 
 export default class Graph extends React.Component {
 	static SVGPrefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg>'
 	static DataURIPrefix = "data:image/svg+xml;utf8,"
 
-	// static LayoutOptions = {
-	// 	name: "cose-bilkent",
-	// 	idealEdgeLength: 144,
-	// 	padding: 12,
-	// 	animate: false,
-	// }
-
 	static LayoutOptions = {
-		name: "breadthfirst",
-		fit: true,
 		padding: 12,
 		animate: false,
+		fit: true,
 	}
+
+	static CoseLayout = Object.assign(
+		{
+			name: "cose",
+			randomize: true,
+			idealEdgeLength: ele => (ele.data("name").length + TAB * 8) * CHAR,
+		},
+		Graph.LayoutOptions
+	)
+
+	static BreadthFirstLayout = Object.assign(
+		{ name: "breadthfirst" },
+		Graph.LayoutOptions
+	)
+
+	static RandomLayout = Object.assign({ name: "random" }, Graph.LayoutOptions)
+	static GridLayout = Object.assign({ name: "grid" }, Graph.LayoutOptions)
 
 	static Style = [
 		{
@@ -51,14 +60,18 @@ export default class Graph extends React.Component {
 		{
 			selector: "edge",
 			style: {
-				"curve-style": "bezier",
-				width: 5,
-				"font-family": "Monaco, monospace",
-				"font-size": "12",
-				"line-color": "#ddd",
-				"target-arrow-color": "#ddd",
-				"target-arrow-shape": "triangle",
 				label: "data(name)",
+				width: 8,
+				"font-size": 12,
+				"line-color": "#ccc",
+				"edge-distances": "node-position",
+				"text-background-color": "ghostwhite",
+				"text-background-padding": 4,
+				"text-background-opacity": 1,
+				"curve-style": "bezier",
+				"font-family": "Monaco, monospace",
+				"target-arrow-color": "#ccc",
+				"target-arrow-shape": "triangle",
 				"text-rotation": "autorotate",
 			},
 		},
@@ -83,7 +96,6 @@ export default class Graph extends React.Component {
 
 	constructor(props) {
 		super(props)
-
 		this.state = {}
 		this.container = null
 	}
@@ -144,23 +156,13 @@ export default class Graph extends React.Component {
 			data.height = height
 		}
 
-		const layout = Object.assign({}, Graph.LayoutOptions)
-		console.log("Graph", graph)
-		if (graph === "") {
-			layout.directed = true
-			layout.fit = true
-		} else {
-			// layout.circle = true
-			layout.fit = true
-		}
-
 		this.cy = cytoscape({
 			container: this.container,
 			elements,
-			layout,
+			layout: Graph.CoseLayout,
 			style: Graph.Style,
-			minZoom: 0.2,
-			maxZoom: 2,
+			minZoom: 0.1,
+			maxZoom: 4,
 			zoom: 1,
 		})
 
@@ -173,20 +175,44 @@ export default class Graph extends React.Component {
 			.on("select", ({ target }) => onSelect(target.id(), graph))
 			.on("unselect", ({ target }) => onUnselect(target.id(), graph))
 
-		this.cy.on("destroy", _ => delete cys[graph])
+		this.cy
+			.on("destroy", _ => delete cys[graph])
+			.on("mouseout", _ => onMouseOut(null, graph))
 	}
 
 	componentWillUnmount() {
 		this.cy.destroy()
 	}
 
+	handleReset = _ => this.cy.fit()
+
+	renderBFS = _ => {
+		const layout = Object.assign(
+			{ directed: this.props.graph === "" },
+			Graph.BreadthFirstLayout
+		)
+		this.cy.layout(layout).run()
+	}
+
+	renderGrid = _ => this.cy.layout(Graph.GridLayout).run()
+	renderRandom = _ => this.cy.layout(Graph.RandomLayout).run()
+	renderCose = _ => this.cy.layout(Graph.CoseLayout).run()
+
 	render() {
+		const { graph } = this.props
+		const graphName = graph === "" ? null : <span>{this.props.graph}</span>
 		return (
-			<div
-				className="graph"
-				graph-name={encode(this.props.graph)}
-				ref={div => (this.container = div)}
-			/>
+			<div className="graph">
+				<div className="control">
+					<span>{graphName}</span>
+					<button onClick={this.renderRandom}>Random</button>
+					<button onClick={this.renderGrid}>Grid</button>
+					<button onClick={this.renderBFS}>BFS</button>
+					<button onClick={this.renderCose}>Cose</button>|
+					<button onClick={this.handleReset}>Reset</button>
+				</div>
+				<div className="container" ref={div => (this.container = div)} />
+			</div>
 		)
 	}
 }

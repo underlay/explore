@@ -12,7 +12,6 @@
 		"@types/react": "^16.8.23",
 		"@types/react-dom": "^16.8.4",
 		"cytoscape": "^3.8.0",
-		"cytoscape-cose-bilkent": "^4.0.0",
 		"jsonld": "^1.6.2",
 		"multihashes": "^0.4.14",
 		"n3": "^1.1.1",

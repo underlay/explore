@@ -26,15 +26,16 @@ main header {
 	display: flex;
 	font-family: "Go Smallcaps";
 	background: darkseagreen;
-	padding: 0.5em;
+	padding: 8px;
 	padding-bottom: 0;
 	border-bottom: 1px solid #36454f;
 	align-items: center;
 }
 
 main header a img {
-	width: 1.5em;
-	margin: 0.5em;
+	width: 3ex;
+	margin-right: 8px;
+	margin-left: 2px;
 }
 
 main header h1 {
@@ -62,12 +63,48 @@ main header div label {
 }
 
 main .graph {
+	display: flex;
+	flex-direction: column;
 	height: 100%;
 	width: 100%;
 }
 
-main .graph.selected,
-main .graph.hover {
+main .graph .control {
+	font-size: 12px;
+	padding: 2px 0 0 4px;
+	background: floralwhite;
+	border-bottom: 1px solid lightgrey;
+	text-align: right;
+	color: #333;
+}
+
+main .graph .control span {
+	float: left;
+}
+
+main .graph .control button {
+	border: initial;
+	background: initial;
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+main .graph .control button:hover {
+	text-decoration: underline;
+}
+
+main .graph .control button:active {
+	font-weight: bold;
+}
+
+main .graph .container {
+	flex: 1;
+}
+
+main .graph .container.selected,
+main .graph .container.hover {
 	box-shadow: inset 0px 0px 0px 2px #36454f;
 }
 
