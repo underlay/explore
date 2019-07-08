@@ -3,71 +3,43 @@ import {
 	FONT_SIZE,
 	FONT_FAMILY,
 	LINE_HEIGHT,
+	XSD_STRING,
+	XSD_BOOLEAN,
+	XSD_INTEGER,
+	XSD_DOUBLE,
+	XSD_DATE,
+	XSD_DATETIME,
 	TAB,
 	CHAR,
 } from "./utils"
 
-const prefixes = {
+const prefixFills = {
 	schema: "#990000",
 	rdf: "#005A9C",
 	prov: "green",
 	ipfs: "#6ACAD1",
 }
 
-const values = {
-	"http://www.w3.org/2001/XMLSchema#string": "#0077AA",
-	"http://www.w3.org/2001/XMLSchema#boolean": "#FF9900",
-	"http://www.w3.org/2001/XMLSchema#integer": "#CA7841",
-	"http://www.w3.org/2001/XMLSchema#double": "#CA7841",
-	"http://www.w3.org/2001/XMLSchema#date": "#990055",
-	"http://www.w3.org/2001/XMLSchema#dateTime": "#990055",
+const valueClasses = {
+	[XSD_STRING]: "string",
+	[XSD_BOOLEAN]: "boolean",
+	[XSD_INTEGER]: "number",
+	[XSD_DOUBLE]: "number",
+	[XSD_DATE]: "date",
+	[XSD_DATETIME]: "date",
 }
 
 const STYLE = `<style>
-text {
-  fill: black;
-}
+text { fill: black }
 .quote {
   fill: black;
   fill-opacity: 0.5;
-  visibility: hidden;
 }
-.datatype {
-  fill-opacity: 0.5;
-}
-.prefix[prefix="schema"] {
-  fill: #990000;
-}
-.prefix[prefix="rdf"] {
-  fill: #005A9C;
-}
-.prefix[prefix="prov"] {
-  fill: green;
-}
-.prefix[prefix="ipfs"] {
-  fill: #6acad1;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#string"] {
-  fill: #0077AA;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#string"] .quote {
-  visibility: visible;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#boolean"] {
-  fill: #FF9900;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#integer"] {
-  fill: #CA7841;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#double"] {
-  fill: #CA7841;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#date"] {
-  fill: #990055;
-}
-.value[type="http://www.w3.org/2001/XMLSchema#dateTime"] {
-  fill: #990055;
-}
+.datatype { fill-opacity: 0.5 }
+.string   { fill: #0077AA }
+.boolean  { fill: #FF9900 }
+.number   { fill: #CA7841 }
+.date     { fill: #990055 }
 </style>`
 
 function compactStyle(term, compact, vocab) {
@@ -87,14 +59,24 @@ function compactStyle(term, compact, vocab) {
 function renderTerm([prefix, suffix], x, y, className) {
 	const classNames = className ? ` class="${className}"` : ""
 	const tspan =
-		prefix && `<tspan class="prefix" prefix="${prefix}">${prefix}</tspan>`
+		prefix &&
+		(prefixFills.hasOwnProperty(prefix)
+			? `<tspan fill="${prefixFills[prefix]}">${prefix}</tspan>`
+			: `<tspan>${prefix}</tspan>`)
 	return `<text${classNames} x="${x}" y="${y}">${tspan + suffix}</text>`
 }
 
 function renderLiteral(literal, type, x, y) {
 	const quote = '<tspan class="quote">"</tspan>'
 	const value = quote + literal.value + quote
-	return `<text x="${x}" y="${y}" class="value" type="${type}">${value}</text>`
+	if (valueClasses.hasOwnProperty(type)) {
+		// Adjust for quotes (not rendered on non-string primitives)
+		const adjustedValue = type === XSD_STRING ? value : literal.value
+		const adjustedX = type === XSD_STRING ? x : x + CHAR
+		return `<text x="${adjustedX}" y="${y}" class="string">${adjustedValue}</text>`
+	} else {
+		return `<text x="${x}" y="${y}">${value}</text>`
+	}
 }
 
 const getLength = ([prefix, suffix]) => prefix.length + suffix.length

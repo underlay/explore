@@ -28,7 +28,7 @@ export default class Graph extends React.Component {
 	)
 
 	static BreadthFirstLayout = Object.assign(
-		{ name: "breadthfirst" },
+		{ name: "breadthfirst", spacingFactor: 1 },
 		Graph.LayoutOptions
 	)
 
@@ -156,10 +156,15 @@ export default class Graph extends React.Component {
 			data.height = height
 		}
 
+		const layout = Object.assign(
+			{ directed: graph === "" },
+			Graph.BreadthFirstLayout
+		)
+
 		this.cy = cytoscape({
 			container: this.container,
 			elements,
-			layout: Graph.CoseLayout,
+			layout,
 			style: Graph.Style,
 			minZoom: 0.1,
 			maxZoom: 4,
