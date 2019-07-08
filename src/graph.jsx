@@ -21,8 +21,6 @@ export default class Graph extends React.Component {
 
 	static LayoutOptions = {
 		name: "breadthfirst",
-		directed: true,
-		grid: false,
 		fit: true,
 		padding: 12,
 		animate: false,
@@ -146,10 +144,20 @@ export default class Graph extends React.Component {
 			data.height = height
 		}
 
+		const layout = Object.assign({}, Graph.LayoutOptions)
+		console.log("Graph", graph)
+		if (graph === "") {
+			layout.directed = true
+			layout.fit = true
+		} else {
+			// layout.circle = true
+			layout.fit = true
+		}
+
 		this.cy = cytoscape({
 			container: this.container,
 			elements,
-			layout: Graph.LayoutOptions,
+			layout,
 			style: Graph.Style,
 			minZoom: 0.2,
 			maxZoom: 2,
