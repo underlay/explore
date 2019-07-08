@@ -22,6 +22,9 @@ text {
 .prefix[prefix="rdf"] {
   fill: #005A9C;
 }
+.prefix[prefix="prov"] {
+  fill: green;
+}
 .value[type="http://www.w3.org/2001/XMLSchema#string"] {
   fill: #0077AA;
 }

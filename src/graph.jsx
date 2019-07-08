@@ -12,9 +12,18 @@ export default class Graph extends React.Component {
 	static SVGPrefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg>'
 	static DataURIPrefix = "data:image/svg+xml;utf8,"
 
+	// static LayoutOptions = {
+	// 	name: "cose-bilkent",
+	// 	idealEdgeLength: 144,
+	// 	padding: 12,
+	// 	animate: false,
+	// }
+
 	static LayoutOptions = {
-		name: "cose-bilkent",
-		idealEdgeLength: 144,
+		name: "breadthfirst",
+		directed: true,
+		grid: false,
+		fit: true,
 		padding: 12,
 		animate: false,
 	}
