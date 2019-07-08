@@ -1,0 +1,24 @@
+{
+	"@context": {
+		"@vocab": "http://schema.org/",
+		"xsd": "http://www.w3.org/2001/XMLSchema#",
+		"prov": "http://www.w3.org/ns/prov#"
+	},
+	"prov:generatedAtTime": {
+		"@type": "xsd:dateTime",
+		"@value": "2019-07-08T16:26:53.488Z"
+	},
+	"prov:wasAttributedTo": {
+		"@id": "_:john",
+		"@type": "prov:Agent"
+	},
+	"@graph": {
+		"@id": "_:john",
+		"@type": "Person",
+		"name": "John Doe",
+		"knows": {
+			"@type": "Person",
+			"name": "Jane Doe"
+		}
+	}
+}

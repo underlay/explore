@@ -1,178 +1,175 @@
 import React from "react"
-import ReactDOMServer from "react-dom/server"
-
-import jsonld from "jsonld"
-import { getInitialContext, process } from "jsonld/lib/context"
-import { compactIri } from "jsonld/lib/compact"
 
 import cytoscape from "cytoscape"
-import bilkent from "cytoscape-cose-bilkent"
-import label from "cytoscape-node-html-label"
 
-import { style, labelStyle, layoutOptions } from "./style"
-import {
-	NodeView,
-	getNodeId,
-	getEdgeId,
-	getTableId,
-	getContainerId,
-} from "./node"
-import fetchHash from "./fetch"
+import { compactIri } from "jsonld/lib/compact"
 
-import baseContext from "./base-context.json"
-import tikaContext from "./tika-context.json"
+import Node from "./node.js"
 
-cytoscape.use(label)
-cytoscape.use(bilkent)
-
-function getContext(base) {
-	const activeCtx = getInitialContext({ base })
-	const localCtx = [baseContext, tikaContext]
-	return process({ activeCtx, localCtx })
-}
-
-function initializeNodes(node, elements, map, compact, parent) {
-	const { "@id": sourceId, "@graph": graph } = node
-	const source = getNodeId(sourceId, parent)
-	map[source] = node
-	const data = { id: source, shape: "rectangle" }
-	if (parent !== null) data.parent = parent
-	elements.push({ group: "nodes", data })
-	if (Array.isArray(graph)) {
-		graph.forEach(node => initializeNodes(node, elements, map, compact, source))
-	}
-}
-
-function initializeLinks(node, elements, map, compact, parent) {
-	const {
-		"@id": sourceId,
-		"@graph": graph,
-		"@type": type,
-		"@index": _,
-		...properties
-	} = node
-	const source = getNodeId(sourceId, parent)
-
-	Object.keys(properties).forEach(property =>
-		node[property].forEach(({ "@list": list, "@id": targetId }, index) => {
-			if (Array.isArray(list)) {
-				// TODO: Something???
-			} else if (map.hasOwnProperty(targetId)) {
-				const id = getEdgeId(sourceId, property, index, parent)
-				const name = compact(property, true)
-				const target = getNodeId(targetId, parent)
-				const data = { id, property, name, source, target }
-				if (parent !== null) data.parent = parent
-				elements.push({ group: "edges", data })
-			}
-		})
-	)
-
-	if (Array.isArray(graph)) {
-		graph.forEach(node => initializeLinks(node, elements, map, compact, source))
-	}
-}
-
-function assembleHTML(id, node, parent, nodes, compact) {
-	const props = { id, node, parent, nodes, compact }
-	const element = <NodeView {...props} />
-	return ReactDOMServer.renderToStaticMarkup(element)
-}
-
-const format = "application/n-quads"
+import { RDF_TYPE, encode } from "./utils.js"
 
 export default class Graph extends React.Component {
-	constructor(props) {
-		super(props)
-		this.state = { error: null }
+	static SVGPrefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg>'
+	static DataURIPrefix = "data:image/svg+xml;utf8,"
+
+	static LayoutOptions = {
+		name: "cose-bilkent",
+		idealEdgeLength: 144,
+		padding: 12,
+		animate: false,
 	}
-	componentDidMount() {
-		window.addEventListener("hashchange", () => this.fetchHash())
-		this.fetchHash()
-	}
-	fetchHash() {
-		const hash = window.location.hash.slice(1)
-		if (hash) {
-			const base = `dweb:/ipfs/${hash}`
-			const ctx = getContext(base)
-			fetchHash(hash)
-				.then(file => jsonld.fromRDF(file, { format }))
-				.then(value => this.setState({ value, hash, ctx }))
-				.catch(error => this.setState({ error }))
-		} else {
-			this.setState({ value: null, hash, ctx: null })
+
+	static Style = [
+		{
+			selector: "node",
+			style: {
+				shape: "rectangle",
+				"background-color": "floralwhite",
+				"background-image": "data(svg)",
+				width: "data(width)",
+				height: "data(height)",
+				"border-width": 1,
+				"border-style": "solid",
+				"border-color": "lightgrey",
+			},
+		},
+		{
+			selector: "node:selected",
+			style: { "border-color": "#36454f" },
+		},
+		{
+			selector: "node.hover",
+			style: { "border-color": "#36454f" },
+		},
+		{
+			selector: "edge",
+			style: {
+				"curve-style": "bezier",
+				width: 5,
+				"font-family": "Monaco, monospace",
+				"font-size": "12",
+				"line-color": "#ddd",
+				"target-arrow-color": "#ddd",
+				"target-arrow-shape": "triangle",
+				label: "data(name)",
+				"text-rotation": "autorotate",
+			},
+		},
+	]
+
+	static createNode({ id }, nodes, elements) {
+		if (!nodes.hasOwnProperty(id)) {
+			const index = elements.length
+			nodes[id] = { index, literals: {}, types: [] }
+			elements.push({ group: "nodes", data: { id: encode(id) } })
 		}
 	}
-	static renderGraph(value, ctx, container) {
+
+	static getDerivedStateFromProps({ store, graph, context }, prevState) {
+		if (store !== prevState.store) {
+			const quads = store.getQuads(null, null, null, graph)
+			return { store, quads, context }
+		} else {
+			return {}
+		}
+	}
+
+	constructor(props) {
+		super(props)
+
+		this.state = {}
+		this.container = null
+	}
+
+	componentDidMount() {
+		const {
+			cys,
+			graph,
+			onSelect,
+			onUnselect,
+			onMouseOver,
+			onMouseOut,
+		} = this.props
+		const { quads, context } = this.state
+
+		if (this.container === null) return
+
 		const compact = (iri, vocab) =>
-			compactIri({ activeCtx: ctx, iri, relativeTo: { vocab: !!vocab } })
+			compactIri({ activeCtx: context, iri, relativeTo: { vocab: !!vocab } })
 
 		const elements = []
 		const nodes = {}
-		value.forEach(node => initializeNodes(node, elements, nodes, compact, null))
-		value.forEach(node => initializeLinks(node, elements, nodes, compact, null))
 
-		const tpl = data =>
-			assembleHTML(data.id, nodes[data.id], data.parent, nodes, compact)
+		for (const index in quads) {
+			const { subject, predicate, object } = quads[index]
+			Graph.createNode(subject, nodes, elements)
 
-		const cy = cytoscape({ container, elements, style })
-		cy.nodeHtmlLabel([{ tpl }, { tpl, query: ":parent", ...labelStyle }])
-		cy.one("render", () => {
-			// cy.edges().on("select", evt => {
-			// 	evt.target.unselect()
-			// 	const [id, property, index] = JSON.parse(evt.target.id())
-			// 	const { source, parent } = evt.target.data()
-			// 	if (!collapsedEdges.hasOwnProperty(id)) collapsedEdges[id] = {}
-			// 	if (!collapsedEdges[id].hasOwnProperty(property))
-			// 		collapsedEdges[id][property] = {}
-			// 	collapsedEdges[id][property][index] = evt.target.remove()
-			// 	const containerId = getContainerId(id)
-			// 	const container = document.getElementById(containerId)
-			// 	const node = nodes[source][0] // ???
-			// 	container.innerHTML = assembleHTML(
-			// 		node,
-			// 		parent,
-			// 		nodes,
-			// 		collapsedEdges,
-			// 		compact
-			// 	)
-			// })
-			cy.nodes().forEach(node => {
-				const id = node.id()
-				const tableId = getTableId(id)
-				const table = document.getElementById(tableId)
-				if (!table) return
-				const { parentElement } = table
-				const { offsetWidth, offsetHeight } = parentElement
-				parentElement.id = getContainerId(id)
-				parentElement.classList.add("node-container")
-				if (node.isParent()) {
-					parentElement.classList.add("compound-node-container")
+			const iri = predicate.id
+
+			if (object.termType === "Literal") {
+				const { literals } = nodes[subject.id]
+				if (Array.isArray(literals[iri])) {
+					literals[iri].push(object)
+				} else {
+					literals[iri] = [object]
 				}
-				node.style("width", offsetWidth)
-				node.style("height", offsetHeight)
-				if (
-					table.firstElementChild.lastElementChild.classList.contains("object")
-				) {
-					const object =
-						table.firstElementChild.lastElementChild.firstElementChild
-							.firstElementChild
-					object.setAttribute("width", (offsetWidth - 6).toString())
-				}
-			})
-			cy.layout(layoutOptions).run()
-		})
-	}
-	render() {
-		const { value, ctx, error } = this.state
-		if (value) {
-			return (
-				<div id="content" ref={div => Graph.renderGraph(value, ctx, div)} />
-			)
-		} else if (error) {
-			return <p className="error">{error.toString()}</p>
-		} else {
-			return <p>Enter a hash in the fragment!</p>
+			} else if (object.termType === "NamedNode" && iri === RDF_TYPE) {
+				nodes[subject.id].types.push(object.id)
+			} else {
+				Graph.createNode(object, nodes, elements)
+
+				const id = encode(index.toString())
+				const name = compact(iri, true)
+				const [source, target] = [subject.id, object.id].map(encode)
+				elements.push({
+					group: "edges",
+					data: { id, iri, name, source, target },
+				})
+			}
 		}
+
+		for (const id in nodes) {
+			const { literals, types, index } = nodes[id]
+			const { data } = elements[index]
+			const [svg, width, height] = Node(id, types, literals, compact)
+			data.svg = Graph.DataURIPrefix + encodeURIComponent(Graph.SVGPrefix + svg)
+			data.width = width
+			data.height = height
+		}
+
+		this.cy = cytoscape({
+			container: this.container,
+			elements,
+			layout: Graph.LayoutOptions,
+			style: Graph.Style,
+			minZoom: 0.2,
+			maxZoom: 2,
+			zoom: 1,
+		})
+
+		cys[graph] = this.cy
+
+		this.cy
+			.nodes()
+			.on("mouseover", ({ target }) => onMouseOver(target.id(), graph))
+			.on("mouseout", ({ target }) => onMouseOut(target.id(), graph))
+			.on("select", ({ target }) => onSelect(target.id(), graph))
+			.on("unselect", ({ target }) => onUnselect(target.id(), graph))
+
+		this.cy.on("destroy", _ => delete cys[graph])
+	}
+
+	componentWillUnmount() {
+		this.cy.destroy()
+	}
+
+	render() {
+		return (
+			<div
+				className="graph"
+				graph-name={encode(this.props.graph)}
+				ref={div => (this.container = div)}
+			/>
+		)
 	}
 }

@@ -1,65 +1,91 @@
+@font-face {
+	font-family: "Go Smallcaps";
+	font-weight: normal;
+	font-style: normal;
+	src: url("gofont/Go-Smallcaps.ttf") format("truetype");
+}
+
 html {
-	width: 100%;
 	height: 100%;
+	font-family: Monaco, monospace;
+	background: ghostwhite;
 }
 
 body {
-	width: 100%;
 	height: 100%;
 	margin: 0;
 }
 
 main {
-	width: 100%;
 	height: 100%;
 	display: flex;
-	flex-direction: row;
-	flex-grow: 1;
+	flex-direction: column;
 }
 
-#content {
-	flex-grow: 1;
-	background-color: ghostwhite;
-	font-family: monospace;
+main header {
+	display: flex;
+	font-family: "Go Smallcaps";
+	background: darkseagreen;
+	padding: 0.5em;
+	padding-bottom: 0;
+	border-bottom: 1px solid #36454f;
+	align-items: center;
 }
 
-main .compound-node-container {
-	margin-left: -10px;
-	margin-top: -10px;
+main header a img {
+	width: 1.5em;
+	margin: 0.5em;
 }
 
-main table.node {
-	background-color: azure;
-	-webkit-box-shadow: 0px 0px 0px 1px rgba(85, 107, 47, 1);
-	-moz-box-shadow: 0px 0px 0px 1px rgba(85, 107, 47, 1);
-	box-shadow: 0px 0px 0px 1px rgba(85, 107, 47, 1);
-	width: unset;
-}
-
-main table.node.entity {
-	background-color: rgb(255, 252, 135);
-}
-
-main table.node.agent {
-	background-color: rgb(253, 178, 102);
-}
-
-main table.node.activity {
-	background-color: rgb(159, 177, 252);
-}
-
-main table.node td {
-	vertical-align: baseline;
-}
-
-main table.node td span {
-	opacity: 0.5;
-}
-
-main table td hr {
+main header h1 {
 	margin: 0;
+	flex: 1;
 }
 
-main table td.type {
-	opacity: 0.5;
+main .empty {
+	margin: 0 auto;
+	padding: 6em 1em;
+	width: 512px;
+}
+
+main .loading {
+	margin: auto;
+}
+
+main header div {
+	margin-bottom: 0.25em;
+}
+
+main header div label {
+	margin-left: 1.3em;
+}
+
+main .graph {
+	height: 100%;
+	width: 100%;
+}
+
+main .graph.selected,
+main .graph.hover {
+	box-shadow: inset 0px 0px 0px 2px #36454f;
+}
+
+/* CID input */
+
+.cid input {
+	font-family: Monaco;
+	margin-right: 4px;
+	border-width: 2px;
+	font-size: inherit;
+}
+
+.cid .hash {
+	border-style: inset;
+	padding: 2px;
+	border-radius: 2px;
+	width: 46ch;
+}
+
+.cid .go {
+	padding: 2px 8px;
 }

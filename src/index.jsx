@@ -1,8 +1,23 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
-import Graph from "./graph"
+import cytoscape from "cytoscape"
+import bilkent from "cytoscape-cose-bilkent"
+
+import Header from "./header"
+import Message from "./message"
+
+cytoscape.use(bilkent)
 
 const main = document.querySelector("main")
 
-ReactDOM.render(<Graph />, main)
+function Browser({}) {
+	return (
+		<React.Fragment>
+			<Header />
+			<Message />
+		</React.Fragment>
+	)
+}
+
+ReactDOM.render(<Browser />, main)

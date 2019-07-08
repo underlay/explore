@@ -8,7 +8,7 @@ const exclude = /(?:node_modules|\.min\.js$|dist\/)/
 module.exports = {
 	entry: ["@babel/polyfill", "./src/index.jsx"],
 	output: {
-		filename: "bundle.js",
+		filename: "bundle.min.js",
 		path: __dirname + "/dist",
 	},
 
