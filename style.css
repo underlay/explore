@@ -48,7 +48,8 @@ main .empty {
 	width: 512px;
 }
 
-main .loading {
+main .loading,
+main .error {
 	margin: auto;
 }
 
