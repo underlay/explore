@@ -203,28 +203,36 @@ export default class Message extends React.Component {
 	render() {
 		const { hash, store, graphs, error } = this.state
 		if (store !== null) {
-			return (
-				<PanelGroup
-					direction="row"
-					borderColor={Message.BorderColor}
-					spacing={1}
-					onUpdate={this.handleOuterUpdate}
-					panelWidths={[
-						{ size: 360, minSize: 240, resize: "dynamic" },
-						{ minSize: 100, resize: "stretch" },
-					]}
-				>
-					{this.renderGraph("")}
+			if (graphs.length > 0) {
+				return (
 					<PanelGroup
-						direction="column"
+						direction="row"
 						borderColor={Message.BorderColor}
 						spacing={1}
-						onUpdate={this.handleInnerUpdate}
+						onUpdate={this.handleOuterUpdate}
+						panelWidths={[
+							{ size: 360, minSize: 240, resize: "dynamic" },
+							{ minSize: 100, resize: "stretch" },
+						]}
 					>
-						{graphs.map(this.renderGraph)}
+						{this.renderGraph("")}
+						{graphs.length > 1 ? (
+							<PanelGroup
+								direction="column"
+								borderColor={Message.BorderColor}
+								spacing={1}
+								onUpdate={this.handleInnerUpdate}
+							>
+								{graphs.map(this.renderGraph)}
+							</PanelGroup>
+						) : (
+							this.renderGraph(graphs[0])
+						)}
 					</PanelGroup>
-				</PanelGroup>
-			)
+				)
+			} else {
+				return this.renderGraph("")
+			}
 		} else if (error !== null) {
 			return <p className="error">{error.toString()}</p>
 		} else if (hash !== null) {

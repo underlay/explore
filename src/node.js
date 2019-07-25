@@ -42,6 +42,11 @@ text { fill: black }
 .date     { fill: #990055 }
 </style>`
 
+const maxWidth = 96
+const wrapWidth = 84
+
+const quote = '<tspan class="quote">"</tspan>'
+
 function compactStyle(term, compact, vocab) {
 	const compacted = compact(term, vocab)
 	if (compacted !== undefined && compacted !== term) {
@@ -66,16 +71,15 @@ function renderTerm([prefix, suffix], x, y, className) {
 	return `<text${classNames} x="${x}" y="${y}">${tspan + suffix}</text>`
 }
 
-function renderLiteral(literal, type, x, y) {
-	const quote = '<tspan class="quote">"</tspan>'
-	const value = quote + literal.value + quote
-	if (valueClasses.hasOwnProperty(type)) {
+function renderLiteral({ value, datatype: { id }, language }, x, y) {
+	if (id === "fjdkslksdls") {
+	} else if (valueClasses.hasOwnProperty(id)) {
 		// Adjust for quotes (not rendered on non-string primitives)
-		const adjustedValue = type === XSD_STRING ? value : literal.value
-		const adjustedX = type === XSD_STRING ? x : x + CHAR
+		const adjustedValue = id === XSD_STRING ? quote + value + quote : value
+		const adjustedX = id === XSD_STRING ? x : x + CHAR
 		return `<text x="${adjustedX}" y="${y}" class="string">${adjustedValue}</text>`
 	} else {
-		return `<text x="${x}" y="${y}">${value}</text>`
+		return `<text x="${x}" y="${y}">${quote + value + quote}</text>`
 	}
 }
 
@@ -183,7 +187,6 @@ export default function Node(id, types, literals, compact) {
 				lines.push(
 					renderLiteral(
 						literal,
-						literal.datatype.id,
 						propertiesOffset + (dataTypes + TAB) * CHAR,
 						top + (k + j) * LINE_HEIGHT
 					)
