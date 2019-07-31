@@ -1,6 +1,7 @@
 # explore
 
-The **Underlay Explorer** is a tool for viewing and exploring underlay messages.  If you have the hash of a message, you can test out the latest explorer [online](https://underlay.github.io/explore/).
+The **Underlay Explorer** is a tool for viewing and exploring underlay messages (by their hash).  
+You can also test out the explorer [online](https://underlay.github.io/explore/).
 
 To explore the samples: 
 * Run a local IPFS daemon
