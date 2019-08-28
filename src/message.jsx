@@ -1,6 +1,6 @@
 import React from "react"
 
-import N3 from "n3"
+import * as N3 from "n3"
 import { getInitialContext, process } from "jsonld/lib/context"
 import PanelGroup from "react-panelgroup"
 
@@ -108,7 +108,7 @@ export default class Message extends React.Component {
 		for (const graph of graphs) {
 			this.cys[graph].$("#" + id).classes("hover")
 			if (id === graphIds[graph]) {
-				this.cys[graph].container().classList.add("hover")
+				this.cys[graph].container().parentElement.classList.add("hover")
 			}
 		}
 		this.cys[""].$("#" + id).classes("hover")
@@ -122,7 +122,7 @@ export default class Message extends React.Component {
 			for (const graph of graphs) {
 				this.cys[graph].$("#" + id).classes("")
 				if (id === graphIds[graph]) {
-					this.cys[graph].container().classList.remove("hover")
+					this.cys[graph].container().parentElement.classList.remove("hover")
 				}
 			}
 			this.cys[""].$("#" + id).classes("")
@@ -139,7 +139,7 @@ export default class Message extends React.Component {
 					this.cys[graph].$("#" + id).select()
 				}
 				if (id === graphIds[graph]) {
-					this.cys[graph].container().classList.add("selected")
+					this.cys[graph].container().parentElement.classList.add("selected")
 				}
 			}
 
@@ -155,7 +155,7 @@ export default class Message extends React.Component {
 
 		const graph = graphs.find(graph => graphIds[graph] === id)
 		if (graph !== undefined) {
-			this.cys[graph].container().classList.remove("selected")
+			this.cys[graph].container().parentElement.classList.remove("selected")
 		}
 
 		if (id === this.selected) {

@@ -103,8 +103,8 @@ main .graph .container {
 	flex: 1;
 }
 
-main .graph .container.selected,
-main .graph .container.hover {
+main .graph.selected,
+main .graph.hover {
 	box-shadow: inset 0px 0px 0px 2px #36454f;
 }
 
