@@ -76,6 +76,7 @@ main .graph .control {
 	border-bottom: 1px solid lightgrey;
 	text-align: right;
 	color: #333;
+	z-index: -1;
 }
 
 main .graph .control span {

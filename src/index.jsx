@@ -6,13 +6,14 @@ import Message from "./message"
 
 const main = document.querySelector("main")
 
-function Browser({}) {
-	return (
+if (window.location.search === "?fullscreen") {
+	ReactDOM.render(<Message />, main)
+} else {
+	ReactDOM.render(
 		<React.Fragment>
 			<Header />
 			<Message />
-		</React.Fragment>
+		</React.Fragment>,
+		main
 	)
 }
-
-ReactDOM.render(<Browser />, main)
