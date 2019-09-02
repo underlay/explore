@@ -6,11 +6,16 @@
 		<link rel="icon" type="image/svg" href="compass.svg" />
 		<link rel="prefetch" href="gofont/Go-Smallcaps.ttf" as="font" />
 		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script defer>
+			const params = {}
+			for (const param of window.location.search.slice(1).split("&")) {
+				const [key, value] = param.split("=")
+				params[key] = value
+			}
+		</script>
+		<script defer src="./dist/bundle.min.js"></script>
 	</head>
-
 	<body>
 		<main></main>
-
-		<script src="./dist/bundle.min.js"></script>
 	</body>
 </html>

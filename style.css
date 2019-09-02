@@ -71,12 +71,18 @@ main .graph {
 
 main .graph .control {
 	font-size: 12px;
-	padding: 2px 0 0 4px;
+	padding: 2px 4px 0 4px;
 	background: floralwhite;
 	border-bottom: 1px solid lightgrey;
 	text-align: right;
 	color: #333;
-	z-index: -1;
+}
+
+main .graph.selected .control,
+main .graph.hover .control {
+	padding: 0 2px 0 2px;
+	border: 2px solid #36454f;
+	border-bottom: 1px solid lightgrey;
 }
 
 main .graph .control span {
@@ -102,6 +108,7 @@ main .graph .control button:active {
 
 main .graph .container {
 	flex: 1;
+	/* height: calc(100% - 19px); */
 }
 
 main .graph.selected,
