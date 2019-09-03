@@ -1,7 +1,7 @@
 {
 	"name": "explore",
 	"description": "Underlay Explorer",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --mode production",
@@ -24,7 +24,7 @@
 		"webpack-cli": "^3.3.7",
 		"react-dom": "^16.9.0"
 	},
-	"main": "webpack.config.js",
+	"main": "src/index.jsx",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/underlay/explore.git"
