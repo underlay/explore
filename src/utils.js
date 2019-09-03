@@ -1,4 +1,6 @@
 export const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+export const RDF_LANG_STRING =
+	"http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
 
 export const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string"
 export const XSD_BOOLEAN = "http://www.w3.org/2001/XMLSchema#boolean"

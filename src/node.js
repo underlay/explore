@@ -1,5 +1,6 @@
 import {
 	RDF_TYPE,
+	RDF_LANG_STRING,
 	FONT_SIZE,
 	FONT_FAMILY,
 	LINE_HEIGHT,
@@ -21,31 +22,31 @@ const prefixFills = {
 }
 
 const valueClasses = {
-	[XSD_STRING]: "string",
-	[XSD_BOOLEAN]: "boolean",
-	[XSD_INTEGER]: "number",
-	[XSD_DOUBLE]: "number",
-	[XSD_DATE]: "date",
-	[XSD_DATETIME]: "date",
+	[XSD_STRING]: "s",
+	[XSD_BOOLEAN]: "b",
+	[XSD_INTEGER]: "n",
+	[XSD_DOUBLE]: "n",
+	[XSD_DATE]: "d",
+	[XSD_DATETIME]: "d",
 }
 
 const STYLE = `<style>
 text { fill: black }
-.quote {
+.q {
   fill: black;
   fill-opacity: 0.5;
 }
-.datatype { fill-opacity: 0.5 }
-.string   { fill: #0077AA }
-.boolean  { fill: #FF9900 }
-.number   { fill: #CA7841 }
-.date     { fill: #990055 }
+.t { fill-opacity: 0.5 }
+.s { fill: #0077AA }
+.b { fill: #FF9900 }
+.n { fill: #CA7841 }
+.d { fill: #990055 }
 </style>`
 
 const maxWidth = 96
 const wrapWidth = 84
 
-const quote = '<tspan class="quote">"</tspan>'
+const quote = '<tspan class="q">"</tspan>'
 
 function compactStyle(term, compact, vocab) {
 	const compacted = compact(term, vocab)
@@ -62,22 +63,32 @@ function compactStyle(term, compact, vocab) {
 }
 
 function renderTerm([prefix, suffix], x, y, className) {
-	const classNames = className ? ` class="${className}"` : ""
-	const tspan =
-		prefix &&
-		(prefixFills.hasOwnProperty(prefix)
-			? `<tspan fill="${prefixFills[prefix]}">${prefix}</tspan>`
-			: `<tspan>${prefix}</tspan>`)
-	return `<text${classNames} x="${x}" y="${y}">${tspan + suffix}</text>`
+	const text = className ? `text class="${className}"` : "text"
+	if (suffix === "") {
+		return `<${text} x="${x}" y="${y}">@${prefix}</text>`
+	} else if (prefix === "") {
+		if (suffix[0] === "_" && suffix[1] === ":") {
+			const label = suffix.slice(2)
+			return `<${text} x="${x}" y="${y}"><tspan class="q">_:</tspan>${label}</text>`
+		} else if (suffix.indexOf(":") >= 0) {
+			return `<${text} x="${x}" y="${y}"><tspan class="q">&lt;</tspan>${suffix}<tspan class="q">&gt;</tspan></text>`
+		} else {
+			return `<${text} x="${x}" y="${y}">${suffix}</text>`
+		}
+	} else if (prefixFills.hasOwnProperty(prefix)) {
+		return `<${text} x="${x}" y="${y}"><tspan fill="${prefixFills[prefix]}">${prefix}</tspan>${suffix}</text>`
+	} else {
+		return `<${text} x="${x}" y="${y}"><tspan>${prefix}</tspan>${suffix}</text>`
+	}
 }
 
 function renderLiteral({ value, datatype: { id }, language }, x, y) {
-	if (id === "fjdkslksdls") {
+	if (id === RDF_LANG_STRING && false) {
 	} else if (valueClasses.hasOwnProperty(id)) {
 		// Adjust for quotes (not rendered on non-string primitives)
 		const adjustedValue = id === XSD_STRING ? quote + value + quote : value
 		const adjustedX = id === XSD_STRING ? x : x + CHAR
-		return `<text x="${adjustedX}" y="${y}" class="string">${adjustedValue}</text>`
+		return `<text x="${adjustedX}" y="${y}" class="s">${adjustedValue}</text>`
 	} else {
 		return `<text x="${x}" y="${y}">${quote + value + quote}</text>`
 	}
@@ -90,9 +101,13 @@ export default function Node(id, types, literals, compact) {
 	const compactKeys = literalKeys.map(key => compactStyle(key, compact, true))
 	const compactRDFTypes = types.map(type => compactStyle(type, compact, true))
 	const compactDataTypes = literalKeys.map(key =>
-		literals[key].map(literal =>
-			compactStyle(literal.datatype.id, compact, true)
-		)
+		literals[key].map(literal => {
+			if (literal.datatype.id === RDF_LANG_STRING) {
+				return [literal.language, ""]
+			} else {
+				return compactStyle(literal.datatype.id, compact, true)
+			}
+		})
 	)
 
 	const name = compactStyle(id, compact, false)
@@ -147,12 +162,12 @@ export default function Node(id, types, literals, compact) {
 
 		if (types.length) {
 			lines.push(renderTerm(type, 6, top))
-			for (const index in compactRDFTypes) {
+			for (let i = 0; i < compactRDFTypes.length; i++) {
 				lines.push(
 					renderTerm(
-						compactRDFTypes[index],
+						compactRDFTypes[i],
 						propertiesOffset,
-						top + LINE_HEIGHT * index
+						top + LINE_HEIGHT * i
 					)
 				)
 			}
@@ -171,18 +186,17 @@ export default function Node(id, types, literals, compact) {
 
 		const h = compactKeys.reduce((j, term, i) => {
 			lines.push(renderTerm(term, 6, top + j * LINE_HEIGHT))
-			for (const k in compactDataTypes[i]) {
+			for (let k = 0; k < compactDataTypes[i].length; k++) {
 				lines.push(
 					renderTerm(
 						compactDataTypes[i][k],
 						propertiesOffset,
 						top + (k + j) * LINE_HEIGHT,
-						"datatype"
+						"t"
 					)
 				)
 			}
-
-			for (const k in literals[literalKeys[i]]) {
+			for (let k = 0; k < literals[literalKeys[i]].length; k++) {
 				const literal = literals[literalKeys[i]][k]
 				lines.push(
 					renderLiteral(
