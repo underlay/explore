@@ -14,15 +14,11 @@ html {
 body {
 	height: 100%;
 	margin: 0;
-}
-
-main {
-	height: 100%;
 	display: flex;
 	flex-direction: column;
 }
 
-main header {
+header {
 	display: flex;
 	font-family: "Go Smallcaps";
 	background: darkseagreen;
@@ -32,14 +28,18 @@ main header {
 	align-items: center;
 }
 
-main header a img {
+header a img {
 	width: 3ex;
 	margin-right: 8px;
 	margin-left: 2px;
 }
 
-main header h1 {
+header h1 {
 	margin: 0;
+	flex: 1;
+}
+
+main {
 	flex: 1;
 }
 
@@ -52,14 +52,6 @@ main .empty {
 main .loading,
 main .error {
 	margin: auto;
-}
-
-main header div {
-	margin-bottom: 0.25em;
-}
-
-main header div label {
-	margin-left: 1.3em;
 }
 
 main .graph {
@@ -108,7 +100,6 @@ main .graph .control button:active {
 
 main .graph .container {
 	flex: 1;
-	/* height: calc(100% - 19px); */
 }
 
 main .graph.selected,

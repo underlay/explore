@@ -1,3 +1,6 @@
+const path = require("path")
+const webpack = require("webpack")
+
 const options = {
 	presets: ["@babel/preset-env", "@babel/preset-react"],
 	plugins: ["@babel/plugin-proposal-class-properties"],
@@ -6,10 +9,10 @@ const options = {
 const exclude = /(?:node_modules|\.min\.js$|dist\/)/
 
 module.exports = {
-	entry: ["@babel/polyfill", "./src/index.jsx"],
+	entry: path.resolve("index.jsx"),
 	output: {
-		filename: "bundle.min.js",
-		path: __dirname + "/dist",
+		filename: "index.min.js",
+		path: path.resolve("lib"),
 	},
 
 	resolve: {

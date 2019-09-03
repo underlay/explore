@@ -8,15 +8,10 @@
 		"watch": "webpack --mode development --watch"
 	},
 	"dependencies": {
-		"@babel/polyfill": "^7.4.4",
-		"@types/react": "^16.9.2",
-		"@types/react-dom": "^16.9.0",
 		"cytoscape": "^3.9.1",
-		"jsonld": "^1.6.2",
-		"multihashes": "^0.4.15",
+		"jsonld": "^1.7.0",
 		"n3": "^1.2.0",
 		"react": "^16.9.0",
-		"react-dom": "^16.9.0",
 		"react-panelgroup": "^1.0.7"
 	},
 	"devDependencies": {
@@ -26,7 +21,8 @@
 		"@babel/preset-react": "^7.0.0",
 		"babel-loader": "^8.0.6",
 		"webpack": "^4.39.3",
-		"webpack-cli": "^3.3.7"
+		"webpack-cli": "^3.3.7",
+		"react-dom": "^16.9.0"
 	},
 	"main": "webpack.config.js",
 	"repository": {
