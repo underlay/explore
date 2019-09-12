@@ -1,0 +1,67 @@
+.explore {
+	flex: 1;
+}
+
+.explore .empty {
+	margin: 0 auto;
+	padding: 6em 1em;
+	width: 512px;
+}
+
+.explore .loading,
+.explore .error {
+	margin: auto;
+}
+
+.explore .graph {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+}
+
+.explore .graph .control {
+	font-size: 12px;
+	padding: 2px 4px 0 4px;
+	background: floralwhite;
+	border-bottom: 1px solid lightgrey;
+	text-align: right;
+	color: #333;
+}
+
+.explore .graph.selected .control,
+.explore .graph.hover .control {
+	padding: 0 2px 0 2px;
+	border: 2px solid #36454f;
+	border-bottom: 1px solid lightgrey;
+}
+
+.explore .graph .control span {
+	float: left;
+}
+
+.explore .graph .control button {
+	border: initial;
+	background: initial;
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+.explore .graph .control button:hover {
+	text-decoration: underline;
+}
+
+.explore .graph .control button:active {
+	font-weight: bold;
+}
+
+.explore .graph .container {
+	flex: 1;
+}
+
+.explore .graph.selected,
+.explore .graph.hover {
+	box-shadow: inset 0px 0px 0px 2px #36454f;
+}
