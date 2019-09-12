@@ -104,6 +104,7 @@ export default class Graph extends React.Component {
 		const {
 			cys,
 			graph,
+			focus,
 			onSelect,
 			onUnselect,
 			onMouseOver,
@@ -183,6 +184,14 @@ export default class Graph extends React.Component {
 		this.cy
 			.on("destroy", _ => delete cys[graph])
 			.on("mouseout", _ => onMouseOut(null, graph))
+
+		if (focus !== null) {
+			const f = encode(focus)
+			this.cy.$(`#${f}`).select()
+			if (f === graph) {
+				this.cy.container().parentElement.classList.add("selected")
+			}
+		}
 	}
 
 	componentWillUnmount() {

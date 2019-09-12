@@ -1,6 +1,6 @@
 import React from "react"
 
-import { base58 } from "./utils.js"
+import { base58 } from "./src/utils.js"
 
 export default class CID extends React.Component {
 	constructor(props) {

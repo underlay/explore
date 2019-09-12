@@ -16,7 +16,9 @@ export const LINE_HEIGHT = 18
 export const FONT_FAMILY = "Monaco, monospace"
 
 export const encode = s => Buffer.from(s).toString("hex")
+export const decode = s => Buffer.from(s, "hex").toString("utf8")
 
+export const ipfsPath = /^(\/ipfs\/[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{46})(?:#(.+)?)?$/
 export const base58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{46}$/
 
 window.encode = encode

@@ -1,5 +1,4 @@
 const path = require("path")
-const webpack = require("webpack")
 
 const options = {
 	presets: ["@babel/preset-env", "@babel/preset-react"],

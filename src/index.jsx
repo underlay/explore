@@ -5,9 +5,8 @@ import { getInitialContext, process } from "jsonld/lib/context"
 import PanelGroup from "react-panelgroup"
 
 import Graph from "./graph.jsx"
-import CID from "./cid.jsx"
 import fetchDocument from "./fetch.js"
-import { base58, encode } from "./utils.js"
+import { ipfsPath, encode, decode } from "./utils.js"
 
 import localCtx from "./context.json"
 
@@ -23,12 +22,17 @@ export default class Message extends React.Component {
 	static SelectedBorderColor = "lightgrey"
 
 	static nullState = {
-		hash: null,
 		error: null,
 		store: null,
 		graphs: null,
+		graphIds: null,
 		context: null,
 	}
+
+	static panelWidths = [
+		{ size: 360, minSize: 240, resize: "dynamic" },
+		{ minSize: 100, resize: "stretch" },
+	]
 
 	static ParserOptions = { format, blankNodePrefix: "_:" }
 	static parseMessage(data) {
@@ -50,38 +54,27 @@ export default class Message extends React.Component {
 
 	constructor(props) {
 		super(props)
-		const hash = window.location.hash.slice(1)
 
 		this.cys = {}
 		this.selected = null
 
-		if (base58.test(hash)) {
-			const context = Message.getContext(`ul:/ipfs/${hash}`)
-			this.state = { ...Message.nullState, hash, context }
+		const { path, focus } = props
+
+		const match = ipfsPath.exec(path + (focus === null ? "" : "#" + focus))
+		if (match !== null) {
+			const context = Message.getContext(`ul:${match[1]}`)
+			this.state = { ...Message.nullState, context }
 		} else {
 			this.state = Message.nullState
 		}
 	}
 
 	componentDidMount() {
-		window.addEventListener("hashchange", () => {
-			const hash = window.location.hash.slice(1)
-			if (base58.test(hash)) {
-				const context = Message.getContext(`ul:/ipfs/${hash}`)
-				this.setState({ ...Message.nullState, hash, context }, this.fetchHash)
-			} else if (hash !== "") {
-				window.location.hash = ""
-			} else if (this.state.hash !== null) {
-				this.setState(Message.nullState)
-			}
-		})
-		if (this.state.hash !== null) {
-			this.fetchHash()
+		if (this.state.context === null) {
+			return
 		}
-	}
 
-	fetchHash = () => {
-		fetchDocument(this.state.hash)
+		fetchDocument(this.props.path)
 			.then(Message.parseMessage)
 			.then(store => {
 				const graphs = []
@@ -99,8 +92,43 @@ export default class Message extends React.Component {
 			.catch(error => this.setState({ ...Message.nullState, error }))
 	}
 
-	renderDefault = () => {
-		return <Graph cys={this.cys} graph={""} context={this.state.context} />
+	shouldComponentUpdate({ path, focus }, nextState) {
+		const { graphs, graphIds } = nextState
+		const f = focus ? encode(focus) : null
+		if (path !== this.props.path) {
+			return true
+		} else if (focus === this.props.focus) {
+			for (const key in Message.nullState) {
+				if (nextState[key] !== this.state[key]) {
+					return true
+				}
+			}
+			return false
+		}
+
+		if (this.props.focus !== null && focus === null) {
+			for (const graph of graphs) {
+				this.cys[graph].$(`:selected[id != '${f}']`).unselect()
+				if (f === graphIds[graph]) {
+					this.cys[graph].container().parentElement.classList.remove("selected")
+				}
+			}
+
+			this.cys[""].$(`:selected[id != '${f}']`).unselect()
+		} else if (this.props.focus !== focus) {
+			for (const graph of graphs) {
+				this.cys[graph].$(`:selected[id != '${f}']`).unselect()
+				this.cys[graph].$(`:unselected[id = '${f}']`).select()
+				if (f === graphIds[graph]) {
+					this.cys[graph].container().parentElement.classList.add("selected")
+				}
+			}
+
+			this.cys[""].$(`:selected[id != '${f}']`).unselect()
+			this.cys[""].$(`:unselected[id = '${f}']`).select()
+		}
+
+		return false
 	}
 
 	handleMouseOver = id => {
@@ -130,47 +158,28 @@ export default class Message extends React.Component {
 	}
 
 	handleSelect = (id, sourceGraph) => {
-		if (id !== this.selected) {
-			this.selected = id
-			const { graphs, graphIds } = this.state
-			for (const graph of graphs) {
-				if (graph !== sourceGraph) {
-					this.cys[graph].$(":selected").unselect()
-					this.cys[graph].$("#" + id).select()
-				}
-				if (id === graphIds[graph]) {
-					this.cys[graph].container().parentElement.classList.add("selected")
-				}
-			}
-
-			if (sourceGraph !== "") {
-				this.cys[""].$(":selected").unselect()
-				this.cys[""].$("#" + id).select()
-			}
+		const focus = decode(id)
+		if (focus !== this.props.focus) {
+			this.props.onFocus(focus)
 		}
 	}
 
 	handleUnselect = (id, sourceGraph) => {
-		const { graphs, graphIds } = this.state
-
-		const graph = graphs.find(graph => graphIds[graph] === id)
-		if (graph !== undefined) {
-			this.cys[graph].container().parentElement.classList.remove("selected")
+		const focus = decode(id)
+		if (focus === this.props.focus) {
+			this.props.onFocus(null)
 		}
+	}
 
-		if (id === this.selected) {
-			this.selected = null
-
-			for (const graph of graphs) {
-				if (graph !== sourceGraph) {
-					this.cys[graph].$(":selected").unselect()
-				}
-			}
-
-			if (sourceGraph !== "") {
-				this.cys[""].$(":selected").unselect()
-			}
-		}
+	renderDefault = () => {
+		return (
+			<Graph
+				cys={this.cys}
+				focus={this.props.focus}
+				graph={""}
+				context={this.state.context}
+			/>
+		)
 	}
 
 	renderGraph = graph => {
@@ -178,6 +187,7 @@ export default class Message extends React.Component {
 			<Graph
 				key={graph}
 				cys={this.cys}
+				focus={this.props.focus}
 				graph={graph}
 				store={this.state.store}
 				context={this.state.context}
@@ -201,55 +211,37 @@ export default class Message extends React.Component {
 	}
 
 	render() {
-		const { hash, store, graphs, error } = this.state
-		if (store !== null) {
-			if (graphs.length > 0) {
-				return (
+		const { context, store, graphs, error } = this.state
+		if (context === null) {
+			return null
+		} else if (store !== null && graphs.length === 0) {
+			return this.renderGraph("")
+		} else if (store !== null) {
+			return (
+				<PanelGroup
+					direction="row"
+					borderColor={Message.BorderColor}
+					spacing={1}
+					onUpdate={this.handleOuterUpdate}
+					panelWidths={Message.panelWidths}
+				>
+					{this.renderGraph("")}
 					<PanelGroup
-						direction="row"
+						direction="column"
 						borderColor={Message.BorderColor}
 						spacing={1}
-						onUpdate={this.handleOuterUpdate}
-						panelWidths={[
-							{ size: 360, minSize: 240, resize: "dynamic" },
-							{ minSize: 100, resize: "stretch" },
-						]}
+						onUpdate={this.handleInnerUpdate}
 					>
-						{this.renderGraph("")}
-						{graphs.length > 1 ? (
-							<PanelGroup
-								direction="column"
-								borderColor={Message.BorderColor}
-								spacing={1}
-								onUpdate={this.handleInnerUpdate}
-							>
-								{graphs.map(this.renderGraph)}
-							</PanelGroup>
-						) : (
-							this.renderGraph(graphs[0])
-						)}
+						{graphs.map(this.renderGraph)}
 					</PanelGroup>
-				)
-			} else {
-				return this.renderGraph("")
-			}
+				</PanelGroup>
+			)
 		} else if (error !== null) {
 			return <p className="error">{error.toString()}</p>
-		} else if (hash !== null) {
+		} else {
 			return (
 				<div className="loading">
 					<p>Loading...</p>
-				</div>
-			)
-		} else {
-			return (
-				<div className="empty">
-					<p>Enter the hash of a message:</p>
-					<CID
-						fontSize="1em"
-						onSubmit={cid => (window.location.hash = cid)}
-						disabled={false}
-					/>
 				</div>
 			)
 		}
