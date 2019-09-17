@@ -92,12 +92,10 @@ export default class Message extends React.Component {
 			.catch(error => this.setState({ ...Message.nullState, error }))
 	}
 
-	shouldComponentUpdate({ path, focus }, nextState) {
-		const { graphs, graphIds } = nextState
-		const f = focus ? encode(focus) : null
-		if (path !== this.props.path) {
+	shouldComponentUpdate({ path: nextPath, focus: nextFocus }, nextState) {
+		if (nextPath !== this.props.path) {
 			return true
-		} else if (focus === this.props.focus) {
+		} else if (nextFocus === this.props.focus) {
 			for (const key in Message.nullState) {
 				if (nextState[key] !== this.state[key]) {
 					return true
@@ -106,29 +104,41 @@ export default class Message extends React.Component {
 			return false
 		}
 
-		if (this.props.focus !== null && focus === null) {
-			for (const graph of graphs) {
-				this.cys[graph].$(`:selected[id != '${f}']`).unselect()
-				if (f === graphIds[graph]) {
-					this.cys[graph].container().parentElement.classList.remove("selected")
-				}
-			}
+		return true
+	}
 
-			this.cys[""].$(`:selected[id != '${f}']`).unselect()
-		} else if (this.props.focus !== focus) {
-			for (const graph of graphs) {
-				this.cys[graph].$(`:selected[id != '${f}']`).unselect()
-				this.cys[graph].$(`:unselected[id = '${f}']`).select()
-				if (f === graphIds[graph]) {
-					this.cys[graph].container().parentElement.classList.add("selected")
-				}
-			}
-
-			this.cys[""].$(`:selected[id != '${f}']`).unselect()
-			this.cys[""].$(`:unselected[id = '${f}']`).select()
+	componentDidUpdate(prevProps, prevState) {
+		const { focus, path } = this.props
+		if (prevProps.path !== path || prevProps.focus === focus) {
+			return
 		}
 
-		return false
+		const focusId = focus === null ? null : encode(focus)
+		for (const graph of this.state.graphs) {
+			if (focus === null) {
+				this.cys[graph].$(":selected").unselect()
+			} else {
+				this.cys[graph].$(`:selected[id != '${focusId}']`).unselect()
+				this.cys[graph].$(`:unselected[id = '${focusId}']`).select()
+			}
+
+			if (graph === prevProps.focus) {
+				this.cys[graph].container().parentElement.classList.remove("selected")
+			} else if (graph === focus) {
+				this.cys[graph].container().parentElement.classList.add("selected")
+			}
+		}
+
+		if (focus === "") {
+			this.cys[""].container().parentElement.classList.add("selected")
+		} else if (prevProps.focus === "") {
+			this.cys[""].container().parentElement.classList.remove("selected")
+		} else if (focus === null) {
+			this.cys[""].$(":selected").unselect()
+		} else {
+			this.cys[""].$(`:selected[id != '${focusId}']`).unselect()
+			this.cys[""].$(`:unselected[id = '${focusId}']`).select()
+		}
 	}
 
 	handleMouseOver = id => {

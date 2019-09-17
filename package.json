@@ -1,7 +1,7 @@
 {
 	"name": "explore",
 	"description": "Underlay Explorer",
-	"version": "0.4.1",
+	"version": "0.4.2",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --mode production",
@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"cytoscape": "^3.10.0",
-		"jsonld": "^1.7.0",
+		"jsonld": "^1.8.0",
 		"n3": "^1.2.0",
 		"react": "^16.9.0",
 		"react-panelgroup": "^1.0.7"
@@ -21,8 +21,8 @@
 		"@babel/preset-react": "^7.0.0",
 		"babel-loader": "^8.0.6",
 		"react-dom": "^16.9.0",
-		"webpack": "^4.40.0",
-		"webpack-cli": "^3.3.8"
+		"webpack": "^4.40.2",
+		"webpack-cli": "^3.3.9"
 	},
 	"main": "src/index.jsx",
 	"repository": {

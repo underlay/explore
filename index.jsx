@@ -4,43 +4,76 @@ import ReactDOM from "react-dom"
 import Message from "./src/index.jsx"
 import CID from "./cid.jsx"
 
-import { ipfsPath } from "./src/utils.js"
+import { base58 } from "./src/utils.js"
 
 const main = document.querySelector("main")
+
+const title = document.title
+const url = location.origin + location.pathname
 
 class Index extends React.Component {
 	constructor(props) {
 		super(props)
-		const match = ipfsPath.exec("/ipfs/" + window.location.hash.slice(1))
+		const match = base58.exec(location.search.slice(1))
 		if (match === null) {
-			this.state = { path: null, focus: null }
+			this.state = { cid: null, focus: null }
+		} else if (location.hash === "" && location.href.slice(-1) === "#") {
+			this.state = { cid: match[0], focus: "" }
+		} else if (location.hash === "") {
+			this.state = { cid: match[0], focus: null }
 		} else {
-			const [_, path, focus] = match
-			this.state = { path, focus: focus || null }
+			this.state = { cid: match[0], focus: location.hash.slice(1) }
 		}
+		history.replaceState(
+			this.state,
+			title,
+			url +
+				(this.state.cid === null ? "" : "?" + this.state.cid) +
+				(this.state.focus === null ? "" : "#" + this.state.focus)
+		)
 	}
 	componentDidMount() {
-		window.addEventListener("hashchange", () => {
-			const hash = window.location.hash.slice(1)
-			const match = ipfsPath.exec("/ipfs/" + hash)
-			if (match !== null) {
-				const [_, path, focus] = match
-				this.setState({ path, focus: focus || null })
-			} else if (hash !== "") {
-				window.location.hash = ""
-			} else if (this.state.path !== null) {
-				this.setState({ path: null, focus: null })
+		addEventListener("hashchange", () => {
+			const state = {}
+			if (location.hash === "" && location.href.slice(-1) === "#") {
+				state.focus = ""
+			} else if (location.hash === "") {
+				state.focus = null
+			} else {
+				state.focus = location.hash.slice(1)
 			}
+
+			history.replaceState(
+				{ cid: this.state.cid, focus: state.focus },
+				title,
+				url + location.search + (state.focus === null ? "" : "#" + state.focus)
+			)
+
+			this.setState(state)
 		})
+
+		// addEventListener("popstate", event => {})
 	}
-	handleSubmit = cid => (window.location.hash = cid)
+	handleSubmit = cid => {
+		history.pushState({ cid }, title, "?" + cid)
+		this.setState({ cid, focus: null })
+	}
 	handleFocus = focus => {
-		const hash = focus === null ? "" : "#" + focus
-		window.location.hash = this.state.path.slice(6) + hash
+		if (focus === null) {
+			history.pushState(
+				{ cid: this.state.cid, focus },
+				title,
+				url + location.search
+			)
+			this.setState({ focus })
+		} else {
+			location.hash = focus
+		}
 	}
 	render() {
-		const { path, focus } = this.state
-		if (path !== null) {
+		const { cid, focus } = this.state
+		if (cid !== null) {
+			const path = "/ipfs/" + cid
 			return <Message path={path} focus={focus} onFocus={this.handleFocus} />
 		} else {
 			return (

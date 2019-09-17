@@ -71,7 +71,9 @@ function renderTerm([prefix, suffix], x, y, className) {
 			const label = suffix.slice(2)
 			return `<${text} x="${x}" y="${y}"><tspan class="q">_:</tspan>${label}</text>`
 		} else if (suffix.indexOf(":") >= 0) {
-			return `<${text} x="${x}" y="${y}"><tspan class="q">&lt;</tspan>${suffix}<tspan class="q">&gt;</tspan></text>`
+			// return `<${text} x="${x}" y="${y}"><tspan class="q">&lt;</tspan>${suffix}<tspan class="q">&gt;</tspan></text>`
+			// return `<${text} x="${x}" y="${y}"><tspan class="q">〈</tspan>${suffix}<tspan class="q">〉</tspan></text>`
+			return `<${text} x="${x}" y="${y}">${suffix}</text>`
 		} else {
 			return `<${text} x="${x}" y="${y}">${suffix}</text>`
 		}

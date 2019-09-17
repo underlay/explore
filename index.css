@@ -1,13 +1,3 @@
-.explore {
-	flex: 1;
-}
-
-.explore .empty {
-	margin: 0 auto;
-	padding: 6em 1em;
-	width: 512px;
-}
-
 .explore .loading,
 .explore .error {
 	margin: auto;

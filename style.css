@@ -39,6 +39,16 @@ header h1 {
 	flex: 1;
 }
 
+main {
+	flex: 1;
+}
+
+main .empty {
+	margin: 0 auto;
+	padding: 6em 1em;
+	width: 512px;
+}
+
 /* CID input */
 
 .cid input {

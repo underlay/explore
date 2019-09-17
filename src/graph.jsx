@@ -188,7 +188,7 @@ export default class Graph extends React.Component {
 		if (focus !== null) {
 			const f = encode(focus)
 			this.cy.$(`#${f}`).select()
-			if (f === graph) {
+			if (focus === graph) {
 				this.cy.container().parentElement.classList.add("selected")
 			}
 		}
