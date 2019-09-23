@@ -24,6 +24,7 @@ class Index extends React.Component {
 		} else {
 			this.state = { cid: match[0], focus: location.hash.slice(1) }
 		}
+
 		history.replaceState(
 			this.state,
 			title,
@@ -32,6 +33,7 @@ class Index extends React.Component {
 				(this.state.focus === null ? "" : "#" + this.state.focus)
 		)
 	}
+
 	componentDidMount() {
 		addEventListener("hashchange", () => {
 			const state = {}
@@ -54,10 +56,12 @@ class Index extends React.Component {
 
 		// addEventListener("popstate", event => {})
 	}
+
 	handleSubmit = cid => {
 		history.pushState({ cid }, title, "?" + cid)
 		this.setState({ cid, focus: null })
 	}
+
 	handleFocus = focus => {
 		if (focus === null) {
 			history.pushState(

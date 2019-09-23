@@ -144,12 +144,16 @@ export default class Message extends React.Component {
 	handleMouseOver = id => {
 		const { graphs, graphIds } = this.state
 		for (const graph of graphs) {
-			this.cys[graph].$("#" + id).classes("hover")
+			if (id !== "") {
+				this.cys[graph].$("#" + id).classes("hover")
+			}
 			if (id === graphIds[graph]) {
 				this.cys[graph].container().parentElement.classList.add("hover")
 			}
 		}
-		this.cys[""].$("#" + id).classes("hover")
+		if (id !== "") {
+			this.cys[""].$("#" + id).classes("hover")
+		}
 	}
 
 	handleMouseOut = (id, graph) => {
@@ -158,12 +162,16 @@ export default class Message extends React.Component {
 			this.cys[graph].$(".hover").classes("")
 		} else {
 			for (const graph of graphs) {
-				this.cys[graph].$("#" + id).classes("")
+				if (id !== "") {
+					this.cys[graph].$("#" + id).classes("")
+				}
 				if (id === graphIds[graph]) {
 					this.cys[graph].container().parentElement.classList.remove("hover")
 				}
 			}
-			this.cys[""].$("#" + id).classes("")
+			if (id !== "") {
+				this.cys[""].$("#" + id).classes("")
+			}
 		}
 	}
 
