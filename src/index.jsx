@@ -1,6 +1,8 @@
 import React from "react"
 
-import * as N3 from "n3"
+import N3StreamParser from "n3/lib/N3StreamParser"
+import N3Store from "n3/lib/N3Store"
+
 import { getInitialContext, process } from "jsonld/lib/context"
 import PanelGroup from "react-panelgroup"
 
@@ -37,8 +39,8 @@ export default class Message extends React.Component {
 	static ParserOptions = { format, blankNodePrefix: "_:" }
 	static parseMessage(data) {
 		return new Promise((resolve, reject) => {
-			const store = new N3.Store()
-			const parser = new N3.StreamParser(Message.ParserOptions)
+			const store = new N3Store()
+			const parser = new N3StreamParser(Message.ParserOptions)
 			parser
 				.on("error", reject)
 				.on("data", quad => store.addQuad(quad))
@@ -189,22 +191,10 @@ export default class Message extends React.Component {
 		}
 	}
 
-	renderDefault = () => {
-		return (
-			<Graph
-				cys={this.cys}
-				focus={this.props.focus}
-				graph={""}
-				context={this.state.context}
-			/>
-		)
-	}
-
 	renderGraph = graph => {
 		return (
 			<Graph
 				key={graph}
-				cys={this.cys}
 				focus={this.props.focus}
 				graph={graph}
 				store={this.state.store}
@@ -213,6 +203,8 @@ export default class Message extends React.Component {
 				onUnselect={this.handleUnselect}
 				onMouseOver={this.handleMouseOver}
 				onMouseOut={this.handleMouseOut}
+				onMount={cy => (this.cys[graph] = cy)}
+				onDestroy={() => delete this.cys[graph]}
 			/>
 		)
 	}

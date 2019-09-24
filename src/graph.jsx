@@ -102,13 +102,14 @@ export default class Graph extends React.Component {
 
 	componentDidMount() {
 		const {
-			cys,
 			graph,
 			focus,
 			onSelect,
 			onUnselect,
 			onMouseOver,
 			onMouseOut,
+			onMount,
+			onDestroy,
 		} = this.props
 		const { quads, context } = this.state
 
@@ -172,7 +173,7 @@ export default class Graph extends React.Component {
 			zoom: 1,
 		})
 
-		cys[graph] = this.cy
+		onMount(this.cy)
 
 		this.cy
 			.nodes()
@@ -182,7 +183,7 @@ export default class Graph extends React.Component {
 			.on("unselect", ({ target }) => onUnselect(target.id(), graph))
 
 		this.cy
-			.on("destroy", _ => delete cys[graph])
+			.on("destroy", _ => onDestroy())
 			.on("mouseout", _ => onMouseOut(null, graph))
 
 		if (focus !== null) {
