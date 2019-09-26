@@ -177,14 +177,14 @@ export default class Message extends React.Component {
 		}
 	}
 
-	handleSelect = (id, sourceGraph) => {
+	handleSelect = id => {
 		const focus = decode(id)
 		if (focus !== this.props.focus) {
 			this.props.onFocus(focus)
 		}
 	}
 
-	handleUnselect = (id, sourceGraph) => {
+	handleUnselect = id => {
 		const focus = decode(id)
 		if (focus === this.props.focus) {
 			this.props.onFocus(null)
@@ -202,7 +202,7 @@ export default class Message extends React.Component {
 				onSelect={this.handleSelect}
 				onUnselect={this.handleUnselect}
 				onMouseOver={this.handleMouseOver}
-				onMouseOut={this.handleMouseOut}
+				onMouseOut={id => this.handleMouseOut(id, graph)}
 				onMount={cy => (this.cys[graph] = cy)}
 				onDestroy={() => delete this.cys[graph]}
 			/>
