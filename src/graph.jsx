@@ -159,7 +159,7 @@ export default class Graph extends React.Component {
 		}
 
 		const layout = Object.assign(
-			{ directed: graph === "" },
+			{ directed: graph === "", circle: graph === null },
 			Graph.BreadthFirstLayout
 		)
 
@@ -177,14 +177,14 @@ export default class Graph extends React.Component {
 
 		this.cy
 			.nodes()
-			.on("mouseover", ({ target }) => onMouseOver(target.id(), graph))
-			.on("mouseout", ({ target }) => onMouseOut(target.id(), graph))
-			.on("select", ({ target }) => onSelect(target.id(), graph))
-			.on("unselect", ({ target }) => onUnselect(target.id(), graph))
+			.on("mouseover", ({ target }) => onMouseOver(target.id()))
+			.on("mouseout", ({ target }) => onMouseOut(target.id()))
+			.on("select", ({ target }) => onSelect(target.id()))
+			.on("unselect", ({ target }) => onUnselect(target.id()))
 
 		this.cy
 			.on("destroy", _ => onDestroy())
-			.on("mouseout", _ => onMouseOut(null, graph))
+			.on("mouseout", _ => onMouseOut(null))
 
 		if (focus !== null) {
 			const f = encode(focus)
@@ -205,7 +205,7 @@ export default class Graph extends React.Component {
 
 	renderBFS = _ => {
 		const layout = Object.assign(
-			{ directed: this.props.graph === "" },
+			{ directed: this.props.graph === "", circle: graph === null },
 			Graph.BreadthFirstLayout
 		)
 		this.cy.layout(layout).run()
@@ -217,11 +217,10 @@ export default class Graph extends React.Component {
 
 	render() {
 		const { graph } = this.props
-		const graphName = graph === "" ? null : <span>{this.props.graph}</span>
 		return (
 			<div className="graph">
 				<div className="control">
-					<span>{graphName}</span>
+					<span>{graph || null}</span>
 					<button onClick={this.renderRandom}>Random</button>
 					<button onClick={this.renderGrid}>Grid</button>
 					<button onClick={this.renderBFS}>BFS</button>

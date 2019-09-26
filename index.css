@@ -16,7 +16,7 @@
 	background: floralwhite;
 	border-bottom: 1px solid lightgrey;
 	text-align: right;
-	color: #333;
+	color: #666;
 }
 
 .explore .graph.selected .control,
@@ -40,6 +40,7 @@
 }
 
 .explore .graph .control button:hover {
+	color: #333;
 	text-decoration: underline;
 }
 
