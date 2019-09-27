@@ -76,6 +76,12 @@ export default class Message extends React.Component {
 			return
 		}
 
+		// addEventListener("resize", () => {
+		// 	for (const graph in this.cys) {
+		// 		this.cys[graph].resize()
+		// 	}
+		// })
+
 		fetchDocument(this.props.path)
 			.then(Message.parseMessage)
 			.then(store => {
@@ -226,6 +232,17 @@ export default class Message extends React.Component {
 			return null
 		} else if (store !== null && graphs.length === 0) {
 			return this.renderGraph("")
+			// return (
+			// 	<PanelGroup
+			// 		direction="row"
+			// 		borderColor={Message.BorderColor}
+			// 		spacing={1}
+			// 		onUpdate={this.handleOuterUpdate}
+			// 		panelWidths={Message.panelWidths}
+			// 	>
+			// 		{this.renderGraph("")}
+			// 	</PanelGroup>
+			// )
 		} else if (store !== null) {
 			return (
 				<PanelGroup

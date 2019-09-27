@@ -204,8 +204,9 @@ export default class Graph extends React.Component {
 	handleReset = _ => this.cy.fit()
 
 	renderBFS = _ => {
+		const { graph } = this.props
 		const layout = Object.assign(
-			{ directed: this.props.graph === "", circle: graph === null },
+			{ directed: graph === "", circle: graph === null },
 			Graph.BreadthFirstLayout
 		)
 		this.cy.layout(layout).run()
@@ -217,8 +218,9 @@ export default class Graph extends React.Component {
 
 	render() {
 		const { graph } = this.props
+		const className = graph === "" ? "graph default" : "graph"
 		return (
-			<div className="graph">
+			<div className={className}>
 				<div className="control">
 					<span>{graph || null}</span>
 					<button onClick={this.renderRandom}>Random</button>

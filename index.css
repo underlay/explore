@@ -4,8 +4,8 @@
 }
 
 .explore .graph {
-	display: flex;
-	flex-direction: column;
+	/* display: flex;
+	flex-direction: column; */
 	height: 100%;
 	width: 100%;
 }
@@ -37,6 +37,7 @@
 	font-size: inherit;
 	color: inherit;
 	cursor: pointer;
+	padding-bottom: 0;
 }
 
 .explore .graph .control button:hover {
@@ -49,7 +50,10 @@
 }
 
 .explore .graph .container {
-	flex: 1;
+	position: absolute;
+	top: 20px;
+	bottom: 0;
+	width: 100%;
 }
 
 .explore .graph.selected,
