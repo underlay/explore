@@ -81,7 +81,9 @@ export default class Graph extends React.Component {
 		if (!nodes.hasOwnProperty(id)) {
 			const index = elements.length
 			nodes[id] = { index, literals: {}, types: [] }
-			elements.push({ group: "nodes", data: { id: encode(id) } })
+			if (elements !== null) {
+				elements.push({ group: "nodes", data: { id: encode(id) } })
+			}
 		}
 	}
 
@@ -134,7 +136,10 @@ export default class Graph extends React.Component {
 			} else {
 				Graph.createNode(object, nodes, elements)
 
-				const id = encode(index.toString())
+				const id =
+					graph === null
+						? encode(quads[index].graph.id)
+						: encode(index.toString())
 				const name = compact(iri, true)
 				const [source, target] = [subject.id, object.id].map(encode)
 				elements.push({
