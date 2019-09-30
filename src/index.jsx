@@ -8,7 +8,7 @@ import PanelGroup from "react-panelgroup"
 
 import Graph from "./graph.jsx"
 import fetchDocument from "./fetch.js"
-import { ipfsPath, encode, decode } from "./utils.js"
+import { ipfsPath, encode } from "./utils.js"
 
 import localCtx from "./context.json"
 
@@ -149,26 +149,28 @@ export default class Message extends React.Component {
 		}
 	}
 
-	handleMouseOver = id => {
+	handleMouseOver = focus => {
 		const { graphs, graphIds } = this.state
+		const id = encode(focus)
 		for (const graph of graphs) {
-			if (id !== "") {
+			if (focus !== "") {
 				this.cys[graph].$("#" + id).classes("hover")
 			}
 			if (id === graphIds[graph]) {
 				this.cys[graph].container().parentElement.classList.add("hover")
 			}
 		}
-		if (id !== "") {
+		if (focus !== "") {
 			this.cys[""].$("#" + id).classes("hover")
 		}
 	}
 
-	handleMouseOut = (id, graph) => {
+	handleMouseOut = (focus, graph) => {
 		const { graphs, graphIds } = this.state
-		if (id === null) {
+		if (focus === null) {
 			this.cys[graph].$(".hover").classes("")
 		} else {
+			const id = encode(focus)
 			for (const graph of graphs) {
 				if (id !== "") {
 					this.cys[graph].$("#" + id).classes("")
@@ -183,15 +185,13 @@ export default class Message extends React.Component {
 		}
 	}
 
-	handleSelect = id => {
-		const focus = decode(id)
+	handleSelect = focus => {
 		if (focus !== this.props.focus) {
 			this.props.onFocus(focus)
 		}
 	}
 
-	handleUnselect = id => {
-		const focus = decode(id)
+	handleUnselect = focus => {
 		if (focus === this.props.focus) {
 			this.props.onFocus(null)
 		}
@@ -232,17 +232,6 @@ export default class Message extends React.Component {
 			return null
 		} else if (store !== null && graphs.length === 0) {
 			return this.renderGraph("")
-			// return (
-			// 	<PanelGroup
-			// 		direction="row"
-			// 		borderColor={Message.BorderColor}
-			// 		spacing={1}
-			// 		onUpdate={this.handleOuterUpdate}
-			// 		panelWidths={Message.panelWidths}
-			// 	>
-			// 		{this.renderGraph("")}
-			// 	</PanelGroup>
-			// )
 		} else if (store !== null) {
 			return (
 				<PanelGroup

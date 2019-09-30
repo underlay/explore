@@ -6,7 +6,7 @@ import { compactIri } from "jsonld/lib/compact"
 
 import Node from "./node.js"
 
-import { RDF_TYPE, encode, CHAR, TAB } from "./utils.js"
+import { RDF_TYPE, encode, CHAR, TAB, decode } from "./utils.js"
 
 export default class Graph extends React.Component {
 	static SVGPrefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg>'
@@ -85,18 +85,11 @@ export default class Graph extends React.Component {
 		}
 	}
 
-	static getDerivedStateFromProps({ store, graph, context }, prevState) {
-		if (store !== prevState.store) {
-			const quads = store.getQuads(null, null, null, graph)
-			return { store, quads, context }
-		} else {
-			return {}
-		}
-	}
-
 	constructor(props) {
 		super(props)
-		this.state = {}
+		const { store, graph } = props
+		const quads = store.getQuads(null, null, null, graph)
+		this.state = { quads }
 		this.container = null
 	}
 
@@ -104,6 +97,7 @@ export default class Graph extends React.Component {
 		const {
 			graph,
 			focus,
+			context: activeCtx,
 			onSelect,
 			onUnselect,
 			onMouseOver,
@@ -111,12 +105,13 @@ export default class Graph extends React.Component {
 			onMount,
 			onDestroy,
 		} = this.props
-		const { quads, context } = this.state
+
+		const { quads } = this.state
 
 		if (this.container === null) return
 
 		const compact = (iri, vocab) =>
-			compactIri({ activeCtx: context, iri, relativeTo: { vocab: !!vocab } })
+			compactIri({ activeCtx, iri, relativeTo: { vocab: !!vocab } })
 
 		const elements = []
 		const nodes = {}
@@ -173,19 +168,6 @@ export default class Graph extends React.Component {
 			zoom: 1,
 		})
 
-		onMount(this.cy)
-
-		this.cy
-			.nodes()
-			.on("mouseover", ({ target }) => onMouseOver(target.id()))
-			.on("mouseout", ({ target }) => onMouseOut(target.id()))
-			.on("select", ({ target }) => onSelect(target.id()))
-			.on("unselect", ({ target }) => onUnselect(target.id()))
-
-		this.cy
-			.on("destroy", _ => onDestroy())
-			.on("mouseout", _ => onMouseOut(null))
-
 		if (focus !== null) {
 			const f = encode(focus)
 			if (focus !== "") {
@@ -194,6 +176,29 @@ export default class Graph extends React.Component {
 			if (focus === graph) {
 				this.cy.container().parentElement.classList.add("selected")
 			}
+		}
+
+		const n = this.cy.nodes()
+		if (typeof onMouseOver === "function") {
+			n.on("mouseover", ({ target }) => onMouseOver(decode(target.id())))
+		}
+		if (typeof onMouseOut === "function") {
+			n.on("mouseout", ({ target }) => onMouseOut(decode(target.id())))
+			this.cy.on("mouseout", _ => onMouseOut(null))
+		}
+		if (typeof onSelect === "function") {
+			n.on("select", ({ target }) => onSelect(decode(target.id())))
+		}
+		if (typeof onUnselect === "function") {
+			n.on("unselect", ({ target }) => onUnselect(decode(target.id())))
+		}
+
+		if (typeof onDestroy === "function") {
+			this.cy.on("destroy", _ => onDestroy())
+		}
+
+		if (typeof onMount === "function") {
+			onMount(this.cy)
 		}
 	}
 
