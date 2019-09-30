@@ -79,9 +79,9 @@ export default class Graph extends React.Component {
 
 	static createNode({ id }, nodes, elements) {
 		if (!nodes.hasOwnProperty(id)) {
-			const index = elements.length
-			nodes[id] = { index, literals: {}, types: [] }
+			nodes[id] = { literals: {}, types: [] }
 			if (elements !== null) {
+				nodes[id].index = elements.length
 				elements.push({ group: "nodes", data: { id: encode(id) } })
 			}
 		}
