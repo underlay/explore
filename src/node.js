@@ -49,6 +49,10 @@ const wrapWidth = 84
 const quote = '<tspan class="q">"</tspan>'
 
 function compactStyle(term, compact, vocab) {
+	if (term && term[0] === "<" && term[term.length - 1] === ">") {
+		term = term.slice(1, -1)
+	}
+
 	const compacted = compact(term, vocab)
 	if (compacted !== undefined && compacted !== term) {
 		const index = compacted.indexOf(":")
@@ -63,6 +67,10 @@ function compactStyle(term, compact, vocab) {
 }
 
 function renderTerm([prefix, suffix], x, y, className) {
+	if (suffix && suffix[0] === "<" && suffix[suffix.length - 1] === ">") {
+		suffix = suffix.slice(1, -1)
+	}
+
 	const text = className ? `text class="${className}"` : "text"
 	if (suffix === "") {
 		return `<${text} x="${x}" y="${y}">@${prefix}</text>`
@@ -83,7 +91,6 @@ function renderTerm([prefix, suffix], x, y, className) {
 }
 
 function renderLiteral({ value, datatype: { id }, language }, x, y) {
-	// Sometimes this happens??
 	if (id && id[0] === "<" && id[id.length - 1] === ">") {
 		id = id.slice(1, -1)
 	}
