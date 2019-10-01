@@ -83,6 +83,11 @@ function renderTerm([prefix, suffix], x, y, className) {
 }
 
 function renderLiteral({ value, datatype: { id }, language }, x, y) {
+	// Sometimes this happens??
+	if (id && id[0] === "<" && id[id.length - 1] === ">") {
+		id = id.slice(1, -1)
+	}
+
 	if (id === RDF_LANG_STRING && false) {
 	} else if (valueClasses.hasOwnProperty(id)) {
 		// Adjust for quotes (not rendered on non-string primitives)
