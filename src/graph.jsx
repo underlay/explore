@@ -159,7 +159,11 @@ export default class Graph extends React.Component {
 		}
 
 		const layout = Object.assign(
-			{ directed: graph === "", circle: graph === null },
+			{
+				directed: graph === "",
+				circle: graph === null,
+				roots: graph === null ? `#${encode(focus)}` : undefined,
+			},
 			Graph.BreadthFirstLayout
 		)
 
