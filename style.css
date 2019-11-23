@@ -22,7 +22,6 @@ header {
 	background: darkseagreen;
 	padding: 8px;
 	padding-bottom: 0;
-	border-bottom: 1px solid #36454f;
 	align-items: center;
 }
 
@@ -41,6 +40,7 @@ main {
 	bottom: 0;
 	top: 46px;
 	width: 100%;
+	border-top: 1px solid #36454f;
 }
 
 main .empty {

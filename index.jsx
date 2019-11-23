@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import Message from "./src/index.jsx"
 import CID from "./cid.jsx"
 
-import { base58 } from "./src/utils.js"
+import { base32 } from "./src/utils.js"
 
 const main = document.querySelector("main")
 
@@ -14,7 +14,7 @@ const url = location.origin + location.pathname
 class Index extends React.Component {
 	constructor(props) {
 		super(props)
-		const match = base58.exec(location.search.slice(1))
+		const match = base32.exec(location.search.slice(1))
 		if (match === null) {
 			this.state = { cid: null, focus: null }
 		} else if (location.hash === "" && location.href.slice(-1) === "#") {

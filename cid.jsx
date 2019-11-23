@@ -1,6 +1,6 @@
 import React from "react"
 
-import { base58 } from "./src/utils.js"
+import { base32 } from "./src/utils.js"
 
 export default class CID extends React.Component {
 	constructor(props) {
@@ -9,7 +9,7 @@ export default class CID extends React.Component {
 	}
 
 	handleChange = ({ target: { value } }) =>
-		this.setState({ value, valid: base58.test(value) })
+		this.setState({ value, valid: base32.test(value) })
 
 	handleSubmit = event => {
 		this.props.onSubmit(this.state.value)
