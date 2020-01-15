@@ -1,13 +1,15 @@
 {
-	"@vocab": "http://www.w3.org/2001/XMLSchema#",
-	"u": "http://underlay.mit.edu/ns#",
-	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-	"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-	"schema": "http://schema.org/",
-	"prov": "http://www.w3.org/ns/prov#",
-	"ipfs": "dweb:/ipfs/",
-	"dcterms": "http://purl.org/dc/terms/",
-	"dc": "http://purl.org/dc/elements/1.1/",
-	"owl": "http://www.w3.org/2002/07/owl#",
-	"ldp": "http://www.w3.org/ns/ldp#"
+	"@context": {
+		"@vocab": "http://www.w3.org/2001/XMLSchema#",
+		"ul": "http://underlay.mit.edu/ns#",
+		"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+		"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+		"schema": "http://schema.org/",
+		"prov": "http://www.w3.org/ns/prov#",
+		"ipfs": "dweb:/ipfs/",
+		"dcterms": "http://purl.org/dc/terms/",
+		"dc": "http://purl.org/dc/elements/1.1/",
+		"owl": "http://www.w3.org/2002/07/owl#",
+		"ldp": "http://www.w3.org/ns/ldp#"
+	}
 }

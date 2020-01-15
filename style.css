@@ -46,7 +46,7 @@ main {
 main .empty {
 	margin: 0 auto;
 	padding: 6em 1em;
-	width: 512px;
+	width: 640px;
 }
 
 /* CID input */
@@ -62,7 +62,7 @@ main .empty {
 	border-style: inset;
 	padding: 2px;
 	border-radius: 2px;
-	width: 46ch;
+	width: 59ch;
 }
 
 .cid .go {

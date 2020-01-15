@@ -19,6 +19,7 @@ const prefixFills = {
 	rdf: "#005A9C",
 	prov: "green",
 	ipfs: "#6ACAD1",
+	dcterms: "#FF6600",
 }
 
 const valueClasses = {

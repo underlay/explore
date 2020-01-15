@@ -8,7 +8,7 @@ const options = {
 const exclude = /(?:node_modules|\.min\.js$|dist\/)/
 
 module.exports = {
-	entry: path.resolve("index.jsx"),
+	entry: ["babel-polyfill", path.resolve("index.jsx")],
 	output: {
 		filename: "index.min.js",
 		path: path.resolve("lib"),

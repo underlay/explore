@@ -18,7 +18,7 @@ export const FONT_FAMILY = "Monaco, monospace"
 export const encode = s => Buffer.from(s).toString("hex")
 export const decode = s => Buffer.from(s, "hex").toString("utf8")
 
-export const ipfsPath = /^(\/ipfs\/[a-z2-7]{59})(?:#(_:c14n\d+)?)?$/
 export const base58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{49}$/
 export const base32 = /^[a-z2-7]{59}$/
+export const fragment = /^_:c14n\d+$/
 window.encode = encode

@@ -3,27 +3,30 @@ import React from "react"
 import N3StreamParser from "n3/lib/N3StreamParser"
 import N3Store from "n3/lib/N3Store"
 
-import { getInitialContext, process } from "jsonld/lib/context"
+import jsonld from "jsonld"
+import { getInitialContext } from "jsonld/lib/context"
 import PanelGroup from "react-panelgroup"
+import IPFS from "ipfs-http-client"
 
 import Graph from "./graph.jsx"
-import fetchDocument from "./fetch.js"
-import { ipfsPath, encode } from "./utils.js"
+import { fragment, base32, encode } from "./utils.js"
 
 import localCtx from "./context.json"
 
 const format = "application/n-quads"
-const processingMode = "json-ld-1.1"
 
 const GraphNameError = new Error(
 	"Invalid message: only named graphs with blank graph names are allowed."
 )
+
+const ipfs = IPFS({ host: "localhost", port: "5001", protocol: "http" })
 
 export default class Message extends React.Component {
 	static BorderColor = "#36454F"
 	static SelectedBorderColor = "lightgrey"
 
 	static nullState = {
+		base: null,
 		error: null,
 		store: null,
 		graphs: null,
@@ -37,8 +40,8 @@ export default class Message extends React.Component {
 	]
 
 	static ParserOptions = { format, blankNodePrefix: "_:" }
-	static parseMessage(data) {
-		return new Promise((resolve, reject) => {
+	static ParseMessage = data =>
+		new Promise((resolve, reject) => {
 			const store = new N3Store()
 			const parser = new N3StreamParser(Message.ParserOptions)
 			parser
@@ -47,11 +50,12 @@ export default class Message extends React.Component {
 				.on("end", () => resolve(store))
 				.end(data)
 		})
-	}
 
 	static getContext(base) {
 		const activeCtx = getInitialContext({ base })
-		return process({ activeCtx, localCtx, processingMode })
+		return jsonld.processContext(activeCtx, localCtx, {
+			// documentLoader,
+		})
 	}
 
 	constructor(props) {
@@ -60,31 +64,25 @@ export default class Message extends React.Component {
 		this.cys = {}
 		this.selected = null
 
-		const { path, focus } = props
+		const { cid, focus } = props
 
-		const match = ipfsPath.exec(path + (focus === null ? "" : "#" + focus))
-		if (match !== null) {
-			const context = Message.getContext(`ul:${match[1]}`)
-			this.state = { ...Message.nullState, context }
+		if (base32.test(cid) && (focus === null || fragment.test(focus))) {
+			this.state = { ...Message.nullState, cid, focus }
 		} else {
 			this.state = Message.nullState
 		}
 	}
 
-	componentDidMount() {
-		if (this.state.context === null) {
+	async componentDidMount() {
+		if (this.state.cid === null) {
 			return
 		}
 
-		// addEventListener("resize", () => {
-		// 	for (const graph in this.cys) {
-		// 		this.cys[graph].resize()
-		// 	}
-		// })
-
-		fetchDocument(this.props.path)
-			.then(Message.parseMessage)
-			.then(store => {
+		Promise.all([
+			Message.getContext(`u:${this.state.cid}`),
+			ipfs.cat(this.props.cid).then(Message.ParseMessage),
+		])
+			.then(([context, store]) => {
 				const graphs = []
 				const graphIds = {}
 				store.forGraphs(({ termType, id }) => {
@@ -95,13 +93,16 @@ export default class Message extends React.Component {
 						throw GraphNameError
 					}
 				})
-				this.setState({ store, graphs, graphIds })
+				this.setState({ store, graphs, graphIds, context })
 			})
-			.catch(error => this.setState({ ...Message.nullState, error }))
+			.catch(error => {
+				console.error(error)
+				this.setState({ ...Message.nullState, error })
+			})
 	}
 
-	shouldComponentUpdate({ path: nextPath, focus: nextFocus }, nextState) {
-		if (nextPath !== this.props.path) {
+	shouldComponentUpdate({ cid: nextCid, focus: nextFocus }, nextState) {
+		if (nextCid !== this.props.cid) {
 			return true
 		} else if (nextFocus === this.props.focus) {
 			for (const key in Message.nullState) {
@@ -116,8 +117,8 @@ export default class Message extends React.Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		const { focus, path } = this.props
-		if (prevProps.path !== path || prevProps.focus === focus) {
+		const { focus, cid } = this.props
+		if (prevProps.cid !== cid || prevProps.focus === focus) {
 			return
 		}
 

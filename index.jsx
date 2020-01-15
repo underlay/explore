@@ -53,8 +53,6 @@ class Index extends React.Component {
 
 			this.setState(state)
 		})
-
-		// addEventListener("popstate", event => {})
 	}
 
 	handleSubmit = cid => {
@@ -77,8 +75,7 @@ class Index extends React.Component {
 	render() {
 		const { cid, focus } = this.state
 		if (cid !== null) {
-			const path = "/ipfs/" + cid
-			return <Message path={path} focus={focus} onFocus={this.handleFocus} />
+			return <Message cid={cid} focus={focus} onFocus={this.handleFocus} />
 		} else {
 			return (
 				<div className="empty">
