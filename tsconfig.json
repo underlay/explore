@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"outDir": "./lib/",
+		"sourceMap": true,
+		"noImplicitAny": true,
+		"module": "commonjs",
+		"target": "ESNext",
+		"jsx": "react",
+		"resolveJsonModule": true,
+		"esModuleInterop": true
+	}
+}

@@ -1,19 +1,26 @@
-import React from "react"
+import * as React from "react"
 
-import { base32 } from "./src/utils.js"
+import { base32 } from "./src/utils"
 
-export default class CID extends React.Component {
-	constructor(props) {
+interface CIDProps {
+	onSubmit(value: string): void
+	disabled: boolean
+}
+
+export default class CID extends React.Component<
+	CIDProps,
+	{ value: string; valid: boolean }
+> {
+	constructor(props: CIDProps) {
 		super(props)
 		this.state = { value: "", valid: false }
 	}
 
-	handleChange = ({ target: { value } }) =>
+	handleChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) =>
 		this.setState({ value, valid: base32.test(value) })
 
-	handleSubmit = event => {
+	handleSubmit = (_: React.FormEvent<HTMLFormElement>) =>
 		this.props.onSubmit(this.state.value)
-	}
 
 	render() {
 		const { disabled } = this.props
