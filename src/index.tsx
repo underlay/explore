@@ -3,14 +3,14 @@ import { N3Store, Term } from "n3"
 import PanelGroup, { PanelWidth } from "react-panelgroup"
 
 import Graph from "./graph"
-import { encode } from "./utils"
+import { encode, BorderColor, PanelWidths, decode } from "./utils"
 
 const GraphNameError = new Error(
 	"Invalid message: only named graphs with blank graph names are allowed."
 )
 
 interface DatasetProps {
-	context?: {}
+	context: {}
 	store: N3Store
 	focus: string
 	onFocus(focus: string): void
@@ -20,210 +20,161 @@ interface DatasetState {
 	error: Error
 	store: N3Store
 	graphs: string[]
-	graphIds: { [key: string]: string }
+	graphIds: Map<string, string>
 }
 
-export default class Dataset extends React.Component<
-	DatasetProps,
-	DatasetState
-> {
-	static BorderColor = "#36454F"
-	static SelectedBorderColor = "lightgrey"
+export default function Dataset({
+	store,
+	context,
+	focus,
+	onFocus
+}: DatasetProps) {
+	const {
+		current: cys
+	}: React.MutableRefObject<Map<string, cytoscape.Core>> = React.useRef(
+		new Map()
+	)
 
-	static panelWidths: PanelWidth[] = [
-		{ size: 360, minSize: 240, resize: "dynamic" },
-		{ minSize: 100, resize: "stretch" },
-	]
-
-	cys: { [id: string]: cytoscape.Core }
-	selected: {}
-
-	static getDerivedStateFromProps(
-		props: DatasetProps,
-		state: DatasetState
-	): Partial<DatasetState> {
-		if (props.store !== state.store) {
-			return Dataset.getGraphs(props.store)
-		} else {
-			return null
-		}
-	}
-
-	static getGraphs(store: N3Store): Partial<DatasetState> {
+	const graphs = React.useMemo(() => {
 		const graphs: string[] = []
-		const graphIds: { [id: string]: string } = {}
 		const forGraphs = ({ termType, id }: Term) => {
 			if (termType === "BlankNode") {
 				graphs.push(id)
-				graphIds[id] = encode(id)
 			} else if (termType !== "DefaultGraph") {
 				throw GraphNameError
 			}
 		}
+
 		store.forGraphs(forGraphs, null, null, null)
-		return { graphs, graphIds }
-	}
+		return graphs
+	}, [store])
 
-	constructor(props: DatasetProps) {
-		super(props)
-		this.cys = {}
-		this.selected = null
-	}
+	const focusRef = React.useRef(focus)
 
-	shouldComponentUpdate(
-		{ focus: nextFocus }: DatasetProps,
-		nextState: DatasetState
-	) {
-		if (nextFocus === this.props.focus) {
-			for (const key in this.state) {
-				const k = key as keyof DatasetState
-				if (nextState[k] !== this.state[k]) {
-					return true
-				}
-			}
-			return false
-		}
+	React.useEffect(() => {
+		focusRef.current = focus
+	}, [focus])
 
-		return true
-	}
-
-	componentDidUpdate(prevProps: DatasetProps, prevState: DatasetState) {
-		const { focus, store } = this.props
-		if (prevProps.store !== store || prevProps.focus === focus) {
-			return
-		}
-
-		const focusId = focus === null ? null : encode(focus)
-		for (const graph of this.state.graphs) {
-			const cy = this.cys[graph]
-			if (focus === null) {
-				cy.$(":selected").unselect()
-			} else {
-				cy.$(`:selected[id != '${focusId}']`).unselect()
-				cy.$(`:unselected[id = '${focusId}']`).select()
-			}
-
-			if (graph === prevProps.focus) {
-				cy.container().parentElement.classList.remove("selected")
-			} else if (graph === focus) {
-				cy.container().parentElement.classList.add("selected")
-			}
-		}
-
-		const cy = this.cys[""]
-		if (focus === "") {
-			cy.container().parentElement.classList.add("selected")
-		} else if (prevProps.focus === "") {
-			cy.container().parentElement.classList.remove("selected")
-		} else if (focus === null) {
-			cy.$(":selected").unselect()
-		} else {
-			cy.$(`:selected[id != '${focusId}']`).unselect()
-			cy.$(`:unselected[id = '${focusId}']`).select()
-		}
-	}
-
-	handleMouseOver = (focus: string) => {
-		const { graphs, graphIds } = this.state
-		const id = encode(focus)
+	const handleOuterUpdate = (_: PanelWidth) => {
 		for (const graph of graphs) {
-			if (focus !== "") {
-				this.cys[graph].$("#" + id).classes("hover")
-			}
-			if (id === graphIds[graph]) {
-				this.cys[graph].container().parentElement.classList.add("hover")
-			}
-		}
-		if (focus !== "") {
-			this.cys[""].$("#" + id).classes("hover")
+			cys.get(graph).resize()
 		}
 	}
 
-	handleMouseOut = (focus: string, graph: string) => {
-		const { graphs, graphIds } = this.state
-		if (focus === null) {
-			this.cys[graph].$(".hover").classes("")
-		} else {
-			const id = encode(focus)
-			for (const graph of graphs) {
-				if (id !== "") {
-					this.cys[graph].$("#" + id).classes("")
-				}
-				if (id === graphIds[graph]) {
-					this.cys[graph].container().parentElement.classList.remove("hover")
-				}
-			}
+	const handleInnerUpdate = (data: PanelWidth) => {
+		handleInnerUpdate(data)
+		cys.get("").resize()
+	}
+
+	const handleMouseOver = React.useCallback((id: string) => {
+		for (const [graph, cy] of cys.entries()) {
 			if (id !== "") {
-				this.cys[""].$("#" + id).classes("")
+				cy.$("#" + encode(id)).classes("hover")
+			}
+
+			if (id === graph) {
+				cy.container().parentElement.classList.add("hover")
 			}
 		}
-	}
+	}, [])
 
-	handleSelect = (focus: string) => {
-		if (focus !== this.props.focus) {
-			this.props.onFocus(focus)
-		}
-	}
-
-	handleUnselect = (focus: string) => {
-		if (focus === this.props.focus) {
-			this.props.onFocus(null)
-		}
-	}
-
-	renderGraph = (graph: string) => {
-		return (
-			<Graph
-				key={graph}
-				focus={this.props.focus}
-				graph={graph}
-				store={this.props.store}
-				activeCtx={this.props.context}
-				onSelect={this.handleSelect}
-				onUnselect={this.handleUnselect}
-				onMouseOver={this.handleMouseOver}
-				onMouseOut={id => this.handleMouseOut(id, graph)}
-				onMount={cy => (this.cys[graph] = cy)}
-				onDestroy={() => delete this.cys[graph]}
-			/>
-		)
-	}
-
-	handleInnerUpdate = (_: PanelWidth) => {
-		for (const graph of this.state.graphs) {
-			this.cys[graph].resize()
-		}
-	}
-
-	handleOuterUpdate = (data: PanelWidth) => {
-		this.handleInnerUpdate(data)
-		this.cys[""].resize()
-	}
-
-	render() {
-		const { graphs } = this.state
-		if (graphs.length === 0) {
-			return this.renderGraph("")
+	const handleMouseOut = React.useCallback((id: string, graph: string) => {
+		if (id === null) {
+			cys
+				.get(graph)
+				.$(".hover")
+				.forEach(ele => {
+					const id = decode(ele.id())
+					if (cys.has(id)) {
+						cys
+							.get(id)
+							.container()
+							.parentElement.classList.remove("hover")
+					}
+				})
+				.classes("")
 		} else {
-			return (
-				<PanelGroup
-					direction="row"
-					borderColor={Dataset.BorderColor}
-					spacing={1}
-					onUpdate={this.handleOuterUpdate}
-					panelWidths={Dataset.panelWidths}
-				>
-					{this.renderGraph("")}
-					<PanelGroup
-						direction="column"
-						borderColor={Dataset.BorderColor}
-						spacing={1}
-						onUpdate={this.handleInnerUpdate}
-					>
-						{graphs.map(this.renderGraph)}
-					</PanelGroup>
-				</PanelGroup>
-			)
+			for (const [graph, cy] of cys.entries()) {
+				if (id !== "") {
+					cy.$("#" + encode(id)).classes("")
+				}
+
+				if (id === graph) {
+					cy.container().parentElement.classList.remove("hover")
+				}
+			}
 		}
-	}
+	}, [])
+
+	const handleSelect = React.useCallback((id: string) => {
+		if (id !== focusRef.current) {
+			const f = encode(id)
+			for (const [graph, cy] of cys.entries()) {
+				if (graph === id) {
+					cy.container().parentElement.classList.add("selected")
+				} else if (id !== "") {
+					cy.$(`#${f}:unselected`).select()
+				}
+
+				if (focusRef.current !== null) {
+					if (graph === focusRef.current) {
+						cy.container().parentElement.classList.remove("selected")
+					} else if (id !== "") {
+						cy.$(`[id != "${f}"]:selected`).unselect()
+					}
+				}
+			}
+
+			onFocus(id)
+		}
+	}, [])
+
+	const handleUnselect = React.useCallback((id: string) => {
+		if (id === focusRef.current) {
+			for (const [graph, cy] of cys.entries()) {
+				if (id === graph) {
+					cy.container().parentElement.classList.remove("selected")
+				}
+				cy.$(`:selected`).unselect()
+			}
+
+			onFocus(null)
+		}
+	}, [])
+
+	const renderGraph = (graph: string) => (
+		<Graph
+			key={graph}
+			focus={focus}
+			graph={graph}
+			store={store}
+			activeCtx={context}
+			onSelect={handleSelect}
+			onUnselect={handleUnselect}
+			onMouseOver={handleMouseOver}
+			onMouseOut={id => handleMouseOut(id, graph)}
+			onMount={cy => cys.set(graph, cy)}
+			onDestroy={() => cys.delete(graph)}
+		/>
+	)
+
+	return (
+		<PanelGroup
+			direction="row"
+			borderColor={BorderColor}
+			spacing={1}
+			onUpdate={handleOuterUpdate}
+			panelWidths={PanelWidths}
+		>
+			{renderGraph("")}
+			<PanelGroup
+				direction="column"
+				borderColor={BorderColor}
+				spacing={1}
+				onUpdate={handleInnerUpdate}
+			>
+				{graphs.map(renderGraph)}
+			</PanelGroup>
+		</PanelGroup>
+	)
 }

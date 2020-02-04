@@ -8,6 +8,6 @@ declare module "ipfs-http-client" {
 	}): IPFS
 
 	interface IPFS {
-		cat(cid: string): Promise<Buffer>
+		cat(cid: string): { next(): Promise<{ value: Buffer; done: boolean }> }
 	}
 }
