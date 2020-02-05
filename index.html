@@ -7,15 +7,23 @@
 		<link rel="prefetch" href="Go-Smallcaps.ttf" as="font" />
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<link href="index.css" rel="stylesheet" type="text/css" />
+
+		<script defer src="node_modules/react/umd/react.development.js"></script>
+		<script
+			defer
+			src="node_modules/react-dom/umd/react-dom.development.js"
+		></script>
 		<script defer>
 			const params = {}
-			for (const param of window.location.search.slice(1).split("&")) {
+			const search = window.location.search.slice(1).split("&")
+			for (const param of search) {
 				const [key, value] = param.split("=")
 				params[key] = value
 			}
 		</script>
 		<script defer src="./lib/index.min.js"></script>
 	</head>
+
 	<body>
 		<header>
 			<a href="#">

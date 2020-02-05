@@ -1,20 +1,15 @@
 import {
-	RDF_TYPE,
-	RDF_LANG_STRING,
 	FONT_SIZE,
 	FONT_FAMILY,
 	LINE_HEIGHT,
-	XSD_STRING,
-	XSD_BOOLEAN,
-	XSD_INTEGER,
-	XSD_DOUBLE,
-	XSD_DATE,
-	XSD_DATETIME,
+	XSD,
+	RDF,
 	TAB,
 	CHAR,
 } from "./utils"
+import { Literal } from "n3"
 
-const prefixFills = {
+const prefixFills: { [prefix: string]: string } = {
 	schema: "#990000",
 	rdf: "#005A9C",
 	prov: "green",
@@ -23,12 +18,12 @@ const prefixFills = {
 }
 
 const valueClasses = {
-	[XSD_STRING]: "s",
-	[XSD_BOOLEAN]: "b",
-	[XSD_INTEGER]: "n",
-	[XSD_DOUBLE]: "n",
-	[XSD_DATE]: "d",
-	[XSD_DATETIME]: "d",
+	[XSD.STRING]: "s",
+	[XSD.BOOLEAN]: "b",
+	[XSD.INTEGER]: "n",
+	[XSD.DOUBLE]: "n",
+	[XSD.DATE]: "d",
+	[XSD.DATETIME]: "d",
 }
 
 const STYLE = `<style>
@@ -44,12 +39,16 @@ text { fill: black }
 .d { fill: #990055 }
 </style>`
 
-const maxWidth = 96
-const wrapWidth = 84
+// const maxWidth = 96
+// const wrapWidth = 84
 
 const quote = '<tspan class="q">"</tspan>'
 
-function compactStyle(term, compact, vocab) {
+function compactStyle(
+	term: string,
+	compact: (term: string, vocab: boolean) => string,
+	vocab: boolean
+): [string, string] {
 	if (term && term[0] === "<" && term[term.length - 1] === ">") {
 		term = term.slice(1, -1)
 	}
@@ -67,7 +66,12 @@ function compactStyle(term, compact, vocab) {
 	}
 }
 
-function renderTerm([prefix, suffix], x, y, className) {
+function renderTerm(
+	[prefix, suffix]: [string, string],
+	x: number,
+	y: number,
+	className?: string
+) {
 	if (suffix && suffix[0] === "<" && suffix[suffix.length - 1] === ">") {
 		suffix = suffix.slice(1, -1)
 	}
@@ -91,31 +95,42 @@ function renderTerm([prefix, suffix], x, y, className) {
 	}
 }
 
-function renderLiteral({ value, datatype: { id }, language }, x, y) {
+function renderLiteral(
+	{ value, datatype: { id }, language }: Literal,
+	x: number,
+	y: number
+) {
 	if (id && id[0] === "<" && id[id.length - 1] === ">") {
 		id = id.slice(1, -1)
 	}
 
-	if (id === RDF_LANG_STRING && false) {
+	if (id === RDF.LANG_STRING && false) {
 	} else if (valueClasses.hasOwnProperty(id)) {
 		// Adjust for quotes (not rendered on non-string primitives)
-		const adjustedValue = id === XSD_STRING ? quote + value + quote : value
-		const adjustedX = id === XSD_STRING ? x : x + CHAR
+		const adjustedValue = id === XSD.STRING ? quote + value + quote : value
+		const adjustedX = id === XSD.STRING ? x : x + CHAR
 		return `<text x="${adjustedX}" y="${y}" class="s">${adjustedValue}</text>`
 	} else {
 		return `<text x="${x}" y="${y}">${quote + value + quote}</text>`
 	}
 }
 
-const getLength = ([prefix, suffix]) => prefix.length + suffix.length
+const getLength = ([prefix, suffix]: [string, string]) =>
+	prefix.length + suffix.length
 
-export default function Node(id, types, literals, compact) {
-	const literalKeys = Object.keys(literals)
+export default function Node(
+	id: string,
+	types: string[],
+	literals: Map<string, Literal[]>,
+	compact: (term: string, vocab: boolean) => string
+) {
+	const literalKeys = Array.from(literals.keys())
+	const literalValues = Array.from(literals.values())
 	const compactKeys = literalKeys.map(key => compactStyle(key, compact, true))
 	const compactRDFTypes = types.map(type => compactStyle(type, compact, true))
-	const compactDataTypes = literalKeys.map(key =>
-		literals[key].map(literal => {
-			if (literal.datatype.id === RDF_LANG_STRING) {
+	const compactDataTypes = literalValues.map(value =>
+		value.map((literal: Literal): [string, string] => {
+			if (literal.datatype.id === RDF.LANG_STRING) {
 				return [literal.language, ""]
 			} else {
 				return compactStyle(literal.datatype.id, compact, true)
@@ -124,7 +139,7 @@ export default function Node(id, types, literals, compact) {
 	)
 
 	const name = compactStyle(id, compact, false)
-	const type = compactStyle(RDF_TYPE, compact, true)
+	const type = compactStyle(RDF.TYPE, compact, true)
 
 	const rdfTypes =
 		compactRDFTypes.length &&
@@ -132,24 +147,24 @@ export default function Node(id, types, literals, compact) {
 
 	const properties = Math.max(
 		types.length && getLength(type),
-		literalKeys.length && Math.max.apply(null, compactKeys.map(getLength))
+		literals.size && Math.max.apply(null, compactKeys.map(getLength))
 	)
 
 	const propertiesOffset = 6 + (properties + TAB) * CHAR
 
 	const dataTypes =
-		literalKeys.length &&
+		literals.size &&
 		Math.max.apply(
 			null,
 			compactDataTypes.map(types => Math.max.apply(null, types.map(getLength)))
 		)
 
 	const dataValues =
-		literalKeys.length &&
+		literals.size &&
 		Math.max.apply(
 			null,
-			literalKeys.flatMap(key =>
-				literals[key].map(literal => 1 + literal.value.length + 1)
+			literalValues.flatMap(value =>
+				value.map(literal => 1 + literal.value.length + 1)
 			)
 		)
 
@@ -165,7 +180,7 @@ export default function Node(id, types, literals, compact) {
 	const lines = ["", STYLE, renderTerm(name, 6, 16)]
 	let height = LINE_HEIGHT + 2
 
-	if (types.length || literalKeys.length) {
+	if (types.length || literals.size) {
 		lines.push(
 			`<line x1="6" y1="22" x2="${width -
 				6}" y2="22" stroke="lightgrey" stroke-opacity="1"/>`
@@ -185,7 +200,7 @@ export default function Node(id, types, literals, compact) {
 				)
 			}
 
-			if (literalKeys.length) {
+			if (literals.size) {
 				const y = top + compactRDFTypes.length * LINE_HEIGHT - 12
 				top = y + 16
 				lines.push(
@@ -209,11 +224,12 @@ export default function Node(id, types, literals, compact) {
 					)
 				)
 			}
-			for (let k = 0; k < literals[literalKeys[i]].length; k++) {
-				const literal = literals[literalKeys[i]][k]
+
+			const l = literals.get(literalKeys[i])
+			for (let k = 0; k < l.length; k++) {
 				lines.push(
 					renderLiteral(
-						literal,
+						l[k],
 						propertiesOffset + (dataTypes + TAB) * CHAR,
 						top + (k + j) * LINE_HEIGHT
 					)

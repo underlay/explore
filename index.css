@@ -1,6 +1,7 @@
 .explore .loading,
 .explore .error {
-	margin: auto;
+	margin: 1em auto;
+	width: max-content;
 }
 
 .explore .graph {
