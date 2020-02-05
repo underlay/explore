@@ -28,12 +28,7 @@ export const decode = (s: string) => Buffer.from(s, "hex").toString("utf8")
 export const base32 = /^[a-z2-7]{59}$/
 export const fragment = /^_:c14n(\d+)$/
 
-export const parseMessage = ({
-	value: data
-}: {
-	value: Buffer
-	done: boolean
-}): Promise<N3Store> =>
+export const parseMessage = (data: Buffer): Promise<N3Store> =>
 	new Promise((resolve, reject) => {
 		const store = new Store()
 		const parser = new StreamParser({

@@ -4,7 +4,7 @@
 		"sourceMap": true,
 		"noImplicitAny": true,
 		"module": "commonjs",
-		"target": "ESNext",
+		"target": "ES2020",
 		"jsx": "react",
 		"resolveJsonModule": true,
 		"esModuleInterop": true

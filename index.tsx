@@ -24,7 +24,7 @@ function getContext(base: string): Promise<{}> {
 	return (jsonld as any).processContext(activeCtx, localCtx, {})
 }
 
-function Index(props: {}) {
+function Index(_: {}) {
 	const [cid, setCid] = React.useState(null)
 	const [store, setStore] = React.useState(null)
 	const [focus, setFocus] = React.useState(null)
@@ -90,13 +90,23 @@ function Index(props: {}) {
 			history.pushState(state, title, href)
 		}
 
+		let cancelled = false
 		if (cid !== null) {
-			ipfs
-				.cat(cid)
-				.next()
-				.then(parseMessage)
-				.then(setStore)
-				.catch(error => setError(error))
+			async function cat() {
+				const chunks: Buffer[] = []
+				for await (const chunk of ipfs.cat(cid)) {
+					chunks.push(chunk)
+				}
+				const data = Buffer.concat(chunks)
+				const store = await parseMessage(data)
+				if (!cancelled) {
+					setStore(store)
+				}
+			}
+			cat().catch(setError)
+		}
+		return () => {
+			cancelled = true
 		}
 	}, [cid])
 
