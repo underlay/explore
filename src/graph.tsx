@@ -1,5 +1,5 @@
 import * as React from "react"
-import cytoscape from "cytoscape"
+import cytoscape, { BreadthFirstLayoutOptions } from "cytoscape"
 import { N3Store, Quad, Term, Literal } from "n3"
 import { compactIri } from "jsonld/lib/compact"
 
@@ -153,7 +153,13 @@ function makeEvents(
 	const directed = graph === ""
 	return {
 		reset: _ => ref.current.fit(),
-		bfs: _ => ref.current.layout({ ...BreadthFirstLayout, directed }).run(),
+		bfs: _ =>
+			ref.current
+				.layout({
+					...BreadthFirstLayout,
+					directed
+				} as BreadthFirstLayoutOptions)
+				.run(),
 		grid: () => ref.current.layout(GridLayout).run(),
 		random: () => ref.current.layout(RandomSource).run(),
 		cose: () => ref.current.layout(CoseLayout).run()

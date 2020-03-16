@@ -1,7 +1,9 @@
-declare module "ipfs-http-client" {
-	export = NewIpfsClient
+type buffer = Buffer
 
-	function NewIpfsClient(options: {
+declare module "ipfs-http-client" {
+	export type Buffer = buffer
+
+	export default function NewIpfsClient(options: {
 		host: string
 		port: string
 		protocol: string

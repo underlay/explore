@@ -16,13 +16,6 @@ interface DatasetProps {
 	onFocus(focus: string): void
 }
 
-interface DatasetState {
-	error: Error
-	store: N3Store
-	graphs: string[]
-	graphIds: Map<string, string>
-}
-
 export default function Dataset({
 	store,
 	context,

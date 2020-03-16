@@ -1,7 +1,7 @@
-import * as React from "react"
-import * as ReactDOM from "react-dom"
-import * as jsonld from "jsonld"
-import IPFS from "ipfs-http-client"
+import React, { useEffect, useCallback, useState } from "react"
+import ReactDOM from "react-dom"
+import jsonld from "jsonld"
+import IPFS, { Buffer } from "ipfs-http-client"
 import { getInitialContext } from "jsonld/lib/context"
 
 import Dataset from "./src/index"
@@ -25,14 +25,14 @@ function getContext(base: string): Promise<{}> {
 }
 
 function Index(_: {}) {
-	const [cid, setCid] = React.useState(null)
-	const [store, setStore] = React.useState(null)
-	const [focus, setFocus] = React.useState(null)
-	const [error, setError] = React.useState(null)
-	const [context, setContext] = React.useState(null)
+	const [cid, setCid] = useState(null)
+	const [store, setStore] = useState(null)
+	const [focus, setFocus] = useState(null)
+	const [error, setError] = useState(null)
+	const [context, setContext] = useState(null)
 
 	// Set CID and hash from query string
-	React.useEffect(() => {
+	useEffect(() => {
 		const { hash, search } = window.location
 		const match = base32.exec(search.slice(1))
 		const state: { cid: string; focus: string } = {
@@ -76,14 +76,14 @@ function Index(_: {}) {
 		return () => removeEventListener("hashchange", onHashChange)
 	}, [])
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (error !== null) {
 			console.error(error)
 		}
 	}, [error])
 
 	// Fetch dataset
-	React.useEffect(() => {
+	useEffect(() => {
 		const state = { cid, focus }
 		const href = makeUrl(state)
 		if (href !== window.location.href) {
@@ -110,14 +110,13 @@ function Index(_: {}) {
 		}
 	}, [cid])
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (cid !== null) {
 			getContext(`ul:${cid}`).then(setContext)
 		}
 	}, [cid])
 
-	const handleFocus = React.useCallback((id: string) => {
-		console.log("setting fragment", id)
+	const handleFocus = useCallback((id: string) => {
 		if (id === null) {
 			history.pushState({ cid, focus: id }, title, url + location.search)
 			setFocus(null)
