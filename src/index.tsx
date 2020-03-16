@@ -2,12 +2,14 @@ import * as React from "react"
 import { N3Store, Term } from "n3"
 import PanelGroup, { PanelWidth } from "react-panelgroup"
 
-import Graph from "./graph"
+import GraphView from "./graph"
 import { encode, BorderColor, PanelWidths, decode } from "./utils"
 
 const GraphNameError = new Error(
 	"Invalid message: only named graphs with blank graph names are allowed."
 )
+
+export const Graph = GraphView
 
 interface DatasetProps {
 	context: {}
@@ -136,7 +138,7 @@ export default function Dataset({
 	}, [])
 
 	const renderGraph = (graph: string) => (
-		<Graph
+		<GraphView
 			key={graph}
 			focus={focus}
 			graph={graph}

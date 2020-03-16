@@ -8,26 +8,26 @@
 		"watch": "webpack --mode development --watch"
 	},
 	"dependencies": {
-		"cytoscape": "^3.13.0",
-		"jsonld": "^2.0.2",
-		"n3": "^1.3.5",
-		"react": "^16.12.0",
-		"react-panelgroup": "^1.0.10",
-		"@types/react": "^16.9.19",
+		"@types/cytoscape": "^3.14.0",
+		"@types/jsonld": "^1.5.1",
+		"@types/n3": "^1.1.5",
+		"@types/react": "^16.9.23",
 		"@types/react-panelgroup": "^1.0.1",
-		"@types/cytoscape": "^3.8.8",
-		"@types/jsonld": "^1.5.0",
-		"@types/n3": "^1.1.5"
+		"cytoscape": "^3.14.0",
+		"jsonld": "^3.0.1",
+		"n3": "^1.3.5",
+		"react": "^16.13.0",
+		"react-panelgroup": "^1.0.10"
 	},
 	"devDependencies": {
 		"@types/react-dom": "^16.9.5",
-		"react-dom": "^16.12.0",
 		"ipfs-http-client": "^42.0.0",
+		"react-dom": "^16.13.0",
 		"source-map-loader": "^0.2.4",
 		"ts-loader": "^6.2.1",
-		"typescript": "^3.7.5",
-		"webpack": "^4.41.5",
-		"webpack-cli": "^3.3.10"
+		"typescript": "^3.8.3",
+		"webpack": "^4.42.0",
+		"webpack-cli": "^3.3.11"
 	},
 	"main": "src/index.tsx",
 	"repository": {
