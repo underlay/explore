@@ -14,7 +14,7 @@
 		"file-loader": "^6.0.0",
 		"jsonld": "^3.1.1",
 		"n3.ts": "0.0.5",
-		"rdf-cytoscape": "^0.3.4",
+		"rdf-cytoscape": "^0.3.5",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"use-debounce": "^3.4.3"
