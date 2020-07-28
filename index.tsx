@@ -48,7 +48,6 @@ async function parseText(text: string, format: string): Promise<Store> {
 				}
 			}
 		}
-		// console.log("quads!", quads)
 		return new Store(quads)
 	} else if (format === nQuadsFormat) {
 		return new Store(Parse(text))
@@ -57,12 +56,30 @@ async function parseText(text: string, format: string): Promise<Store> {
 	}
 }
 
-function Index({}: {}) {
-	const [error, setError] = useState(null as null | string)
-	const [format, setFormat] = useState(initialFormat)
+type Format = typeof jsonLdFormat | typeof nQuadsFormat
+
+function Index(
+	props:
+		| {
+				frame?: false
+		  }
+		| {
+				frame: true
+				format: Format
+				src: string
+		  }
+) {
+	const [error, setError] = useState(null as string | null)
+	const [format, setFormat] = useState(
+		props.frame ? props.format : initialFormat
+	)
+
 	const handleFormatChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) =>
-			setFormat(event.target.value),
+		({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+			if (value === jsonLdFormat || value === nQuadsFormat) {
+				setFormat(value)
+			}
+		},
 		[]
 	)
 
@@ -86,6 +103,10 @@ function Index({}: {}) {
 				setError(error.toString())
 			})
 	}, [text, format])
+
+	if (props.frame) {
+		return <Frame store={store} error={error} />
+	}
 
 	return (
 		<React.Fragment>
@@ -117,14 +138,26 @@ function Index({}: {}) {
 				</header>
 				<textarea value={value} onChange={handleValueChange}></textarea>
 			</div>
-			<div className="rdf-cytoscape">
-				{store === null ? (
-					<p className="error">{error || "Loading..."}</p>
-				) : (
-					<Dataset dataset={store} />
-				)}
-			</div>
+			<Frame store={store} error={error} />
 		</React.Fragment>
+	)
+}
+
+function Frame({
+	store,
+	error,
+}: {
+	store: Store | null
+	error: string | null
+}) {
+	return (
+		<div className="rdf-cytoscape">
+			{store === null ? (
+				<p className="error">{error || "Loading..."}</p>
+			) : (
+				<Dataset dataset={store} />
+			)}
+		</div>
 	)
 }
 

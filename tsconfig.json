@@ -1,6 +1,7 @@
 {
 	"exclude": ["src"],
 	"compilerOptions": {
+		"strict": true,
 		"noImplicitAny": true,
 		"module": "ESNext",
 		"target": "ESNext",
