@@ -24,12 +24,16 @@ main .input {
 }
 
 main .input a {
-	padding: 0.5em 1em 0.25em 1em;
+	padding: 0.5em 1em 0 1em;
+}
+
+main .input hr {
+	width: 100%;
 }
 
 main .input header {
 	display: flex;
-	padding: 0.25em 1em;
+	padding: 0 1em 0.25em 1em;
 }
 
 main .input header > span {

@@ -112,8 +112,9 @@ function Index(
 		<React.Fragment>
 			<div className="input">
 				<a href="https://github.com/underlay/explore">underlay/explore</a>
+				<hr />
 				<header>
-					<span>Input type:</span>
+					<span>input type:</span>
 					<label>
 						<input
 							type="radio"
