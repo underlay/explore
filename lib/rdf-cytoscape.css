@@ -1,16 +1,20 @@
-.explore .loading,
-.explore .error {
-	margin: 1em auto;
-	width: max-content;
+.rdf-cytoscape {
+	font-family: Monaco, monospace;
+	background-color: ghostwhite;
+	border: 1px solid black;
 }
 
-.explore .graph {
+.rdf-cytoscape .error {
+	margin: 1em auto;
+}
+
+.rdf-cytoscape .graph {
 	position: relative;
 	height: 100%;
 	width: 100%;
 }
 
-.explore .graph .control {
+.rdf-cytoscape .graph .control {
 	font-size: 12px;
 	padding: 2px 4px 0 4px;
 	background: floralwhite;
@@ -19,18 +23,18 @@
 	color: #666;
 }
 
-.explore .graph.selected .control,
-.explore .graph.hover .control {
+.rdf-cytoscape .graph.selected .control,
+.rdf-cytoscape .graph.hover .control {
 	padding: 0 2px 0 2px;
 	border: 2px solid #36454f;
 	border-bottom: 1px solid lightgrey;
 }
 
-.explore .graph .control span {
+.rdf-cytoscape .graph .control span {
 	float: left;
 }
 
-.explore .graph .control button {
+.rdf-cytoscape .graph .control button {
 	border: initial;
 	background: initial;
 	font-family: inherit;
@@ -40,23 +44,23 @@
 	padding-bottom: 0;
 }
 
-.explore .graph .control button:hover {
+.rdf-cytoscape .graph .control button:hover {
 	color: #333;
 	text-decoration: underline;
 }
 
-.explore .graph .control button:active {
+.rdf-cytoscape .graph .control button:active {
 	font-weight: bold;
 }
 
-.explore .graph .container {
+.rdf-cytoscape .graph .container {
 	position: absolute;
 	top: 20px;
 	bottom: 0;
 	width: 100%;
 }
 
-.explore .graph.selected,
-.explore .graph.hover {
+.rdf-cytoscape .graph.selected,
+.rdf-cytoscape .graph.hover {
 	box-shadow: inset 0px 0px 0px 2px #36454f;
 }

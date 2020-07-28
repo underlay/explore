@@ -1,70 +1,64 @@
-@font-face {
-	font-family: "Go Smallcaps";
-	font-weight: normal;
-	font-style: normal;
-	src: url("Go-Smallcaps.ttf") format("truetype");
-}
-
 html {
 	height: 100%;
-	font-family: Monaco, monospace;
 	background: ghostwhite;
 }
 
 body {
 	height: 100%;
 	margin: 0;
-}
-
-header {
 	display: flex;
-	font-family: "Go Smallcaps";
-	background: darkseagreen;
-	padding: 8px;
-	padding-bottom: 0;
-	align-items: center;
-}
-
-header a img {
-	width: 3ex;
-	margin-right: 8px;
-	margin-left: 2px;
-}
-
-header h1 {
-	margin: 0;
+	flex-direction: column;
 }
 
 main {
-	position: absolute;
-	bottom: 0;
-	top: 46px;
-	width: 100%;
-	border-top: 1px solid #36454f;
+	display: flex;
+	flex: 1;
 }
 
-main .empty {
-	margin: 0 auto;
-	padding: 6em 1em;
-	width: 640px;
+main .input {
+	background-color: lavender;
+	border: 1px solid #36454f;
+	border-right: none;
+	display: flex;
+	flex-direction: column;
 }
 
-/* CID input */
-
-.cid input {
-	font-family: Monaco;
-	margin-right: 4px;
-	border-width: 2px;
-	font-size: inherit;
+main .input a {
+	padding: 0.5em 1em 0.25em 1em;
 }
 
-.cid .hash {
-	border-style: inset;
-	padding: 2px;
-	border-radius: 2px;
-	width: 59ch;
+main .input header {
+	display: flex;
+	padding: 0.25em 1em;
 }
 
-.cid .go {
-	padding: 2px 8px;
+main .input header > span {
+	flex: 1;
+}
+
+main .input header label input {
+	user-select: none;
+}
+
+main .input textarea {
+	resize: none;
+	width: 360px;
+	height: 400px;
+	font-family: monospace;
+	padding: 0.5em;
+	white-space: pre;
+	background-color: aliceblue;
+	flex: 1;
+}
+
+main .input textarea:focus {
+	outline: none;
+}
+
+main .rdf-cytoscape {
+	flex: 1;
+}
+
+main .rdf-cytoscape .error {
+	margin: 1em;
 }

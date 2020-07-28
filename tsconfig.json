@@ -1,11 +1,11 @@
 {
+	"exclude": ["src"],
 	"compilerOptions": {
-		"outDir": "./lib/",
-		"sourceMap": true,
 		"noImplicitAny": true,
-		"module": "commonjs",
-		"target": "ES2020",
+		"module": "ESNext",
+		"target": "ESNext",
 		"jsx": "react",
+		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"esModuleInterop": true
 	}

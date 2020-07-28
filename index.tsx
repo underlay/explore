@@ -1,151 +1,131 @@
 import React, { useEffect, useCallback, useState } from "react"
 import ReactDOM from "react-dom"
 import jsonld from "jsonld"
-import IPFS, { Buffer } from "ipfs-http-client"
-import { getInitialContext } from "jsonld/lib/context"
+import { useDebounce } from "use-debounce"
+import { QuadT, Store, Parse } from "n3.ts"
+import "rdf-cytoscape/rdf-cytoscape.css"
 
-import Dataset from "./src/index"
-import CID from "./cid"
-import localCtx from "./src/context.json"
-
-import { base32, fragment, parseMessage } from "./src/utils"
+import { Dataset } from "rdf-cytoscape"
 
 const main = document.querySelector("main")
 
-const title = document.title
-const url = location.origin + location.pathname
-const makeUrl = ({ cid, focus }: { cid: string; focus: string }) =>
-	url + (cid === null ? "" : "?" + cid) + (focus === null ? "" : "#" + focus)
+const jsonLdFormat = "json-ld",
+	nQuadsFormat = "n-quads"
+const initialFormat = jsonLdFormat
+const initialText = JSON.stringify(
+	{
+		"@context": {
+			"@vocab": "http://schema.org/",
+		},
+		"@type": "Person",
+		name: "John Doe",
+	},
+	null,
+	"  "
+)
 
-const ipfs = IPFS({ host: "localhost", port: "5001", protocol: "http" })
-
-function getContext(base: string): Promise<{}> {
-	const activeCtx = getInitialContext({ base })
-	return (jsonld as any).processContext(activeCtx, localCtx, {})
+async function parseText(text: string, format: string): Promise<Store> {
+	if (format === jsonLdFormat) {
+		const doc = JSON.parse(text)
+		const quads = (await jsonld.toRDF(doc)) as QuadT[]
+		for (const quad of quads) {
+			if (quad.subject.termType === "BlankNode") {
+				const value = quad.subject.value
+				if (value.startsWith("_:")) {
+					quad.subject.value = value.slice(2)
+				}
+			}
+			if (quad.object.termType === "BlankNode") {
+				const value = quad.object.value
+				if (value.startsWith("_:")) {
+					quad.object.value = value.slice(2)
+				}
+			}
+			if (quad.graph.termType === "BlankNode") {
+				const value = quad.graph.value
+				if (value.startsWith("_:")) {
+					quad.graph.value = value.slice(2)
+				}
+			}
+		}
+		// console.log("quads!", quads)
+		return new Store(quads)
+	} else if (format === nQuadsFormat) {
+		return new Store(Parse(text))
+	} else {
+		throw new Error(`Invalid format ${format}`)
+	}
 }
 
-function Index(_: {}) {
-	const [cid, setCid] = useState(null)
-	const [store, setStore] = useState(null)
-	const [focus, setFocus] = useState(null)
-	const [error, setError] = useState(null)
-	const [context, setContext] = useState(null)
+function Index({}: {}) {
+	const [error, setError] = useState(null as null | string)
+	const [format, setFormat] = useState(initialFormat)
+	const handleFormatChange = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) =>
+			setFormat(event.target.value),
+		[]
+	)
 
-	// Set CID and hash from query string
+	const [value, setValue] = useState(initialText)
+	const handleValueChange = useCallback(
+		(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+			setValue(event.target.value),
+		[]
+	)
+
+	const [store, setStore] = useState(null as Store | null)
+	const [text] = useDebounce(value, 1000)
 	useEffect(() => {
-		const { hash, search } = window.location
-		const match = base32.exec(search.slice(1))
-		const state: { cid: string; focus: string } = {
-			cid: null,
-			focus: null
-		}
+		parseText(text, format)
+			.then((store) => {
+				setStore(store)
+				setError(null)
+			})
+			.catch((error) => {
+				setStore(null)
+				setError(error.toString())
+			})
+	}, [text, format])
 
-		if (match !== null) {
-			setCid(match[0])
-			state.cid = match[0]
-			if (hash === "" && location.href.slice(-1) === "#") {
-				setFocus("")
-				state.focus = "#"
-			} else if (fragment.test(hash.slice(1))) {
-				setFocus(hash.slice(1))
-				state.focus = hash.slice(1)
-			}
-		}
-
-		const href = makeUrl(state)
-		history.replaceState(state, title, href)
-
-		addEventListener("popstate", ({ state: { cid, focus } }) => {
-			setCid(cid)
-			setStore(null)
-			setFocus(focus)
-		})
-
-		const onHashChange = () => {
-			const { hash, href } = window.location
-			if (hash === "" && href.slice(-1) === "#") {
-				setFocus("")
-			} else if (fragment.test(hash.slice(1))) {
-				setFocus(hash.slice(1))
-			} else {
-				setFocus(null)
-			}
-		}
-
-		addEventListener("hashchange", onHashChange)
-		return () => removeEventListener("hashchange", onHashChange)
-	}, [])
-
-	useEffect(() => {
-		if (error !== null) {
-			console.error(error)
-		}
-	}, [error])
-
-	// Fetch dataset
-	useEffect(() => {
-		const state = { cid, focus }
-		const href = makeUrl(state)
-		if (href !== window.location.href) {
-			history.pushState(state, title, href)
-		}
-
-		let cancelled = false
-		if (cid !== null) {
-			async function cat() {
-				const chunks: Buffer[] = []
-				for await (const chunk of ipfs.cat(cid)) {
-					chunks.push(chunk)
-				}
-				const data = Buffer.concat(chunks)
-				const store = await parseMessage(data)
-				if (!cancelled) {
-					setStore(store)
-				}
-			}
-			cat().catch(setError)
-		}
-		return () => {
-			cancelled = true
-		}
-	}, [cid])
-
-	useEffect(() => {
-		if (cid !== null) {
-			getContext(`ul:${cid}`).then(setContext)
-		}
-	}, [cid])
-
-	const handleFocus = useCallback((id: string) => {
-		if (id === null) {
-			history.pushState({ cid, focus: id }, title, url + location.search)
-			setFocus(null)
-		} else {
-			location.hash = id
-		}
-	}, [])
-
-	if (error !== null) {
-		return <p className="error">{error.toString()}</p>
-	} else if (store !== null && context !== null) {
-		return (
-			<Dataset
-				store={store}
-				focus={focus}
-				onFocus={handleFocus}
-				context={context}
-			/>
-		)
-	} else if (cid !== null) {
-		return <p className="loading">Loading...</p>
-	} else {
-		return (
-			<div className="empty">
-				<p>Enter the hash of a message:</p>
-				<CID onSubmit={setCid} disabled={false} />
+	return (
+		<React.Fragment>
+			<div className="input">
+				<a href="https://github.com/underlay/explore">underlay/explore</a>
+				<header>
+					<span>Input type:</span>
+					<label>
+						<input
+							type="radio"
+							value={nQuadsFormat}
+							name="format"
+							// disabled={true}
+							checked={format === nQuadsFormat}
+							onChange={handleFormatChange}
+						></input>
+						N-Quads
+					</label>
+					<label>
+						<input
+							type="radio"
+							value={jsonLdFormat}
+							name="format"
+							checked={format === jsonLdFormat}
+							onChange={handleFormatChange}
+						></input>
+						JSON-LD
+					</label>
+				</header>
+				<textarea value={value} onChange={handleValueChange}></textarea>
 			</div>
-		)
-	}
+			<div className="rdf-cytoscape">
+				{store === null ? (
+					<p className="error">{error || "Loading..."}</p>
+				) : (
+					<Dataset dataset={store} />
+				)}
+			</div>
+		</React.Fragment>
+	)
 }
 
 ReactDOM.render(<Index />, main)
